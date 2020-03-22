@@ -1,5 +1,6 @@
 import { Player } from './player';
 import { Message } from './message';
+import { Wager } from './wager';
 
 export class Game {
   players: Player[] = [];
@@ -23,7 +24,8 @@ export class Game {
 
   public addPlayer(player: Player) {
     this.players.push(player);
-    // TODO: Add listeners for wagering or calling bullshit
+    // TODO: Remove event listener when player leaves
+    player.actions.on('wager', wager => this.handleWager(player, wager));
     this.updateClients();
   }
 
@@ -48,5 +50,69 @@ export class Game {
       payload: this.publicGameDetails
     };
     this.broadcastToClients(message);
+  }
+
+  // Returns true if wager was correct, false for bullshit
+  private testWager(wager: Wager): boolean {
+    let counterFxn;
+    if (this.hasOnesBeenWagered) {
+      counterFxn = d => d === wager.die;
+    } else {
+      // Ones are wild unless they've been called
+      counterFxn = d => d === wager.die || d === 1;
+    }
+
+    const allDice: number[] = this.players.map(p => p.currentRoll).reduce((a, b) => a.concat(b), []);
+    const count = allDice.filter(counterFxn).length;
+    return count >= wager.num;
+  }
+
+  private calledBullshit(caller: Player, previousPlayer: Player) {
+    // TODO: Need to reveal everybody's dice to the players
+    const wagerToTest = previousPlayer.lastWager;
+    const wagerWasSafe = this.testWager(wagerToTest);
+    if (wagerWasSafe) {
+      caller.loseOneDie();
+    } else {
+      previousPlayer.loseOneDie()
+    }
+    this.beginNewRound();
+  }
+
+  private handleWager(player: Player, wager: Wager) {
+    const currentPlayerIndex = this.getPlayerIndex(player);
+  
+    if (wager.callBullshit) {
+      const previousPlayer = this.getPreviousPlayer(currentPlayerIndex);
+      this.calledBullshit(player, previousPlayer);
+    } else {
+      if (wager.die === 1) {
+        this.hasOnesBeenWagered = true;
+      }
+    }
+
+    const nextPlayer = this.getNextPlayer(currentPlayerIndex);
+    nextPlayer.startTurn();
+    this.updateClients();
+  }
+
+  private getPlayerIndex(player: Player): number {
+    return this.players.indexOf(player);
+  }
+
+  private getNextPlayer(currentPlayerIndex: number): Player {
+    if (currentPlayerIndex + 1 >= this.players.length) {
+      return this.players[0];
+    } else {
+      return this.players[currentPlayerIndex + 1];
+    }
+  }
+
+  private getPreviousPlayer(currentPlayerIndex: number): Player {
+    if (currentPlayerIndex - 1 < 0) {
+      return this.players[this.players.length - 1];
+    } else {
+      return this.players[currentPlayerIndex - 1];
+    }
   }
 }

@@ -1,6 +1,7 @@
 import { Wager } from './wager';
 import { Message } from './message';
 import { pick } from 'lodash';
+import { EventEmitter } from 'events';
 
 export class Player {
   ws: WebSocket;
@@ -10,6 +11,7 @@ export class Player {
   isInGame: boolean = false;
   isTheirTurn: boolean = false;
   lastWager: Wager;
+  actions = new EventEmitter();
 
   constructor(ws: WebSocket, name: string) {
     this.ws = ws;
@@ -49,12 +51,8 @@ export class Player {
   public placeWager(wager: Wager) {
     this.lastWager = wager;
     this.isTheirTurn = false;
-    // emit to game if 1s were wagered
+    this.actions.emit('wager', wager);
     this.updateClient();
-  }
-
-  public callBullshit() {
-    // emit to the game that we're calling bullshit?
   }
 
   public loseOneDie() {

@@ -1,4 +1,5 @@
 export interface Wager {
-  num: number;
-  die: number;
+  callBullshit?: boolean;
+  num?: number;
+  die?: number;
 }
