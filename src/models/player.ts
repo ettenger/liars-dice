@@ -1,4 +1,5 @@
 import { Wager } from './wager';
+import { Message } from './message';
 
 export class Player {
   ws: WebSocket;
@@ -16,7 +17,12 @@ export class Player {
   }
   
   public updateClient() {
-    this.ws.send(JSON.stringify({ player: this }));
+    const message: Message = {
+      type: 'data',
+      name: 'player',
+      payload: this
+    };
+    this.ws.send(JSON.stringify(message));
   }
 
   public beginGame(numDice: number) {
