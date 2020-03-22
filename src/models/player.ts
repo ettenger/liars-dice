@@ -1,5 +1,6 @@
 import { Wager } from './wager';
 import { Message } from './message';
+import { pick } from 'lodash';
 
 export class Player {
   ws: WebSocket;
@@ -14,6 +15,10 @@ export class Player {
     this.ws = ws;
     this.name = name;
     // need to listen to WS for client placing wager or calling bullshit
+  }
+
+  get publicDetails() {
+    return pick(this, ['name', 'numDice', 'isInGame', 'isTheirTurn', 'lastWager']);
   }
   
   public updateClient() {
