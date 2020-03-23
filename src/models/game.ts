@@ -26,6 +26,7 @@ export class Game {
     this.players.push(player);
     // TODO: Remove event listener when player leaves
     player.actions.on('wager', wager => this.handleWager(player, wager));
+    player.actions.on('updated', this.updateClients.bind(this))
     this.updateClients();
   }
 

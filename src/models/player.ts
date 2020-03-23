@@ -4,7 +4,7 @@ import { pick } from 'lodash';
 import { EventEmitter } from 'events';
 
 export class Player {
-  ws: WebSocket;
+  ws: any;
   name: string;
   numDice: number;
   currentRoll: number[];
@@ -13,14 +13,18 @@ export class Player {
   lastWager: Wager;
   actions = new EventEmitter();
 
-  constructor(ws: WebSocket, name: string) {
+  constructor(ws) {
     this.ws = ws;
-    this.name = name;
-    // need to listen to WS for client placing wager or calling bullshit
+    this.ws.on('message', this.handleClientMessage.bind(this));
   }
 
   get publicDetails() {
     return pick(this, ['name', 'numDice', 'isInGame', 'isTheirTurn', 'lastWager']);
+  }
+
+  public setName(name: string) {
+    this.name = name;
+    this.actions.emit('updated');
   }
   
   public updateClient() {
@@ -70,5 +74,29 @@ export class Player {
 
   private randNumberOneToSix(): number {
     return Math.ceil(Math.random() * 6);
+  }
+
+  private handleClientMessage(data: string) {
+    let message;
+    try {
+      message = JSON.parse(data) as Message;
+    } catch (e) {
+      console.log(e, data);
+      return;
+    }
+    
+    if (message.type === 'data') {
+      switch (message.name) {
+        case 'name':
+          this.setName(message.payload);
+          break;
+      }
+    } else if (message.type === 'action') {
+      switch (message.name) {
+        case 'wager':
+          this.placeWager(message.payload);
+          break;
+      }
+    }
   }
 }
