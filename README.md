@@ -12,6 +12,7 @@ You need NodeJS: https://nodejs.org/
 $ git clone <this-repo>
 $ cd liars-dice/server
 $ npm install
+$ npm install tslint typescript
 $ cd ../client
 $ npm install
 ```
