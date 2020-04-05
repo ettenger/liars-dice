@@ -2,7 +2,7 @@ import { Server } from 'ws';
 import { Game } from './models/game';
 import { Player } from './models/player';
 
-const port = parseInt(process.env.port) || 8080;
+const port = parseInt(process.env.port, 10) || 8080;
 const wss = new Server({ port });
 console.log('Listening on', port);
 
