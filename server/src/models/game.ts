@@ -82,7 +82,7 @@ export class Game {
 
   private handleWager(player: Player, wager: Wager) {
     const currentPlayerIndex = this.getPlayerIndex(player);
-  
+
     if (wager.callBullshit) {
       const previousPlayer = this.getPreviousPlayer(currentPlayerIndex);
       this.calledBullshit(player, previousPlayer);

@@ -26,7 +26,7 @@ export class Player {
     this.name = name;
     this.actions.emit('updated');
   }
-  
+
   public updateClient() {
     const message: Message = {
       type: 'data',
@@ -61,7 +61,7 @@ export class Player {
 
   public loseOneDie() {
     this.numDice = this.numDice - 1;
-    
+
     if (this.numDice === 0) {
       this.isInGame = false;
     }
@@ -84,7 +84,7 @@ export class Player {
       console.log(e, data);
       return;
     }
-    
+
     if (message.type === 'data') {
       switch (message.name) {
         case 'name':
