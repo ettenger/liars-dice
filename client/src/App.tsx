@@ -1,19 +1,22 @@
 import React from 'react'; 
 import './App.css';
-import NameInput from './components/NameInput'
+import NameInput from './components/NameInput';
+import GameLog from './components/GameLog';
+import Message from './interfaces/message';
 
 type AppState = {
   ws?: WebSocket,
-  name: string
+  name: string,
+  messages: Message[]
 }
 
 export class App extends React.Component<{}, AppState> {
   constructor(props: any) {
     super(props);
-    this.state = { name: ''};
+    this.state = { name: '', messages: []};
   }
 
-  connect = (name: string) => {
+  private connect = (name: string) => {
     const ws = new WebSocket('ws://localhost:8080');
     
     ws.onopen = () => {
@@ -21,9 +24,14 @@ export class App extends React.Component<{}, AppState> {
         ws.send(JSON.stringify({ type: 'data', name: 'name', payload: name}));
     };
 
-    ws.onmessage = function (event) {
+    ws.onmessage = (event: MessageEvent) => {
       console.log(event.data);
+      this.addMessage(JSON.parse(event.data));
     }
+  }
+
+  private addMessage = (message: Message) => {
+    this.setState({ messages: [...this.state.messages, message]  });
   }
 
   render() {
@@ -31,7 +39,7 @@ export class App extends React.Component<{}, AppState> {
       <div className="App">
         <header className="App-header">
           { this.state.ws ? 
-            <h2>Liar's Dice - Connected as { this.state.name }</h2> : 
+            <GameLog messages = { this.state.messages } /> :
             <NameInput onNameSubmit = { this.connect } />
           }
         </header>
