@@ -24,7 +24,7 @@ export class Player {
 
   public setName(name: string) {
     this.name = name;
-    this.actions.emit('updated');
+    this.actions.emit('updated', this);
   }
 
   public updateClient() {

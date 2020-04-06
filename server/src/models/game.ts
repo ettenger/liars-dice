@@ -26,8 +26,7 @@ export class Game {
     this.players.push(player);
     // TODO: Remove event listener when player leaves
     player.actions.on('wager', wager => this.handleWager(player, wager));
-    player.actions.on('updated', this.updateClients.bind(this))
-    this.updateClients();
+    player.actions.on('updated', plyr => this.handleUpdate(plyr));
   }
 
   beginNewRound() {
@@ -36,6 +35,11 @@ export class Game {
       player.beginNewRound();
     });
     this.updateClients();
+  }
+
+  private handleUpdate(player: Player) {
+    const actionData = { kind: 'player add', data: player.name };
+    this.sendActionToClients(actionData);
   }
 
   private broadcastToClients(message: Message) {
@@ -49,6 +53,15 @@ export class Game {
       type: 'data',
       name: 'game',
       payload: this.publicGameDetails
+    };
+    this.broadcastToClients(message);
+  }
+
+  private sendActionToClients(data: any) {
+    const message: Message = {
+      type: 'action',
+      name: 'game',
+      payload: data
     };
     this.broadcastToClients(message);
   }
