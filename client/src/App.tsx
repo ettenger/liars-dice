@@ -35,16 +35,26 @@ export class App extends React.Component<{}, AppState> {
   }
 
   render() {
-    return (
-      <div className="App">
-        <header className="App-header">
-          { this.state.ws ? 
-            <GameLog messages = { this.state.messages } /> :
+    if (!this.state.ws) {
+      return (
+        <div className="App">
+          <header className="App-header">
             <NameInput onNameSubmit = { this.connect } />
-          }
-        </header>
-      </div>
-    );
+          </header>
+        </div>
+      );
+    } else {
+      return (
+        <div className="App">
+          <header className="App-header">
+            <div className="Opponent-status"></div>
+            <div className="My-dice"></div>
+            <GameLog messages = { this.state.messages } />
+            <div className="Action-panel"></div>
+          </header>
+        </div>
+      );
+    }
   }
 }
 

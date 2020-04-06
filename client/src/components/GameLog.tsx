@@ -25,7 +25,7 @@ export class GameLog extends React.Component<myProps> {
 
   render() {
     return (
-      <div>
+      <div className="Gamelog">
         <p>
           { this.props.messages.map((message, index) =>
             <this.GameLogMessage
