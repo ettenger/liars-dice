@@ -15,9 +15,7 @@ export class GameLog extends React.Component<myProps> {
       switch (props.message.payload.kind) {
         case 'player add':
           returnVal = 
-            <p>
-              <span style={{color: 'green'}}>{ props.message.payload.data } joined the game</span>
-            </p>;
+              <span style={{color: 'green'}}>{ props.message.payload.data } joined the game<br/></span>;
           break;
       }
     } 
@@ -29,12 +27,14 @@ export class GameLog extends React.Component<myProps> {
     return (
       <div>
         <p>Game Log</p>
-        {this.props.messages.map((message, index) =>
-          <this.GameLogMessage
-            key={index}
-            message={message}
-          />,
-        )}
+        <p>
+          { this.props.messages.map((message, index) =>
+            <this.GameLogMessage
+              key={index}
+              message={message}
+            />,
+          )}
+        </p>
       </div>
     );
   }
