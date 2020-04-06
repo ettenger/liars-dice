@@ -29,7 +29,7 @@ export class NameInput extends React.Component<myProps, myState> {
     return (
       <form onSubmit={this.handleSubmit}>
         <label>What should we call you?</label><br></br>
-        <input type="text" value={this.state.value} onChange={this.handleChange} /><br></br>
+        <input type="text" value={this.state.value} onChange={this.handleChange} autoFocus/><br></br>
         <input type="submit" value="Submit" />
       </form>
     );
