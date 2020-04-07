@@ -5,7 +5,7 @@ type myProps = {
   messages: Message[]
 };
 
-export class GameLog extends React.Component<myProps> {
+export default class GameLog extends React.Component<myProps> {
 
   private GameLogMessage = (props: { key: any, message: Message }) => {
     let returnVal: any;
@@ -38,5 +38,3 @@ export class GameLog extends React.Component<myProps> {
     );
   }
 }
-
-export default GameLog;

@@ -31,7 +31,7 @@ export class Player {
     const message: Message = {
       type: 'data',
       name: 'player',
-      payload: this
+      payload: this.publicDetails
     };
     this.ws.send(JSON.stringify(message));
   }
@@ -77,9 +77,10 @@ export class Player {
   }
 
   private handleClientMessage(data: string) {
-    let message;
+    let message: Message;
     try {
       message = JSON.parse(data) as Message;
+      console.log(message);
     } catch (e) {
       console.log(e, data);
       return;
@@ -96,6 +97,9 @@ export class Player {
         case 'wager':
           this.placeWager(message.payload);
           break;
+        case 'start game':
+            this.beginGame(6);
+            break;
       }
     }
   }

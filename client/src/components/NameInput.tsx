@@ -8,7 +8,7 @@ type myState = {
   value: string
 }
 
-export class NameInput extends React.Component<myProps, myState> {
+export default class NameInput extends React.Component<myProps, myState> {
   constructor(props: myProps) {
     super(props);
     this.state = { value: '' };
@@ -35,5 +35,3 @@ export class NameInput extends React.Component<myProps, myState> {
     );
   }
 }
-
-export default NameInput;
