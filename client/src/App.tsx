@@ -31,6 +31,7 @@ export default class App extends React.Component<{}, AppState> {
       let message: Message;
       try {
         message = JSON.parse(event.data) as Message;
+        console.log('Received message object:');
         console.log(message);
       } catch (e) {
         console.log('Unable to parse incoming message!');

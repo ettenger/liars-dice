@@ -11,11 +11,15 @@ export default class GameLog extends React.Component<myProps> {
     let returnVal: any;
 
     // const actionData = { kind: 'player add', data: player.name };
-    if (props.message.type === 'action' && props.message.name === 'game') {
-      switch (props.message.payload.kind) {
-        case 'player add':
+    if (props.message.type === 'action') {
+      switch (props.message.name) {
+        case 'player join':
           returnVal = 
-              <span style={{color: 'green'}}>{ props.message.payload.data } joined the game<br/></span>;
+              <span style={{color: 'green'}}>{ props.message.payload } joined the game<br/></span>;
+          break;
+        case 'game start':
+          returnVal = 
+              <span style={{color: 'cyan'}}>The game is starting!<br/></span>;
           break;
       }
     } 

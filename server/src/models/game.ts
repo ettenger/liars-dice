@@ -6,6 +6,7 @@ export class Game {
   players: Player[] = [];
   startingNumberOfDice: number = 6;
   hasOnesBeenWagered: boolean = false;
+  hasGameStarted: boolean = false;
 
   constructor() {
   }
@@ -18,7 +19,8 @@ export class Game {
     return {
       players: this.players.map(p => p.publicDetails),
       numDiceRemaining: this.numDiceRemaining,
-      hasOnesBeenWagered: this.hasOnesBeenWagered
+      hasOnesBeenWagered: this.hasOnesBeenWagered,
+      hasGameStarted: this.hasGameStarted
     }
   }
 
@@ -26,7 +28,8 @@ export class Game {
     this.players.push(player);
     // TODO: Remove event listener when player leaves
     player.actions.on('wager', wager => this.handleWager(player, wager));
-    player.actions.on('updated', plyr => this.handleUpdate(plyr));
+    player.actions.on('updated', playerName => this.handleUpdate(playerName));
+    player.actions.on('start game', () => this.handleGameStart());
   }
 
   beginNewRound() {
@@ -37,9 +40,29 @@ export class Game {
     this.updateClients();
   }
 
+  private handleGameStart() {
+    // Start the game
+    if (this.hasGameStarted) { return; }
+    this.hasGameStarted = true;
+
+    // TODO: Actually start the game
+
+    // Tell players the game has started
+    const message: Message = {
+      type: 'action',
+      name: 'game start',
+      payload: ''
+    };
+    this.broadcastToClients(message);
+  }
+
   private handleUpdate(player: Player) {
-    const actionData = { kind: 'player add', data: player.name };
-    this.sendActionToClients(actionData);
+    const message: Message = {
+      type: 'action',
+      name: 'player join',
+      payload: player.name
+    };
+    this.broadcastToClients(message);
   }
 
   private broadcastToClients(message: Message) {
@@ -53,15 +76,6 @@ export class Game {
       type: 'data',
       name: 'game',
       payload: this.publicGameDetails
-    };
-    this.broadcastToClients(message);
-  }
-
-  private sendActionToClients(data: any) {
-    const message: Message = {
-      type: 'action',
-      name: 'game',
-      payload: data
     };
     this.broadcastToClients(message);
   }

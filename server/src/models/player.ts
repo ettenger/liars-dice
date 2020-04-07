@@ -98,8 +98,8 @@ export class Player {
           this.placeWager(message.payload);
           break;
         case 'start game':
-            this.beginGame(6);
-            break;
+          this.actions.emit('start game');
+          break;
       }
     }
   }
