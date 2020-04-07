@@ -41,7 +41,7 @@ export class Game {
   }
 
   private handleGameStart() {
-    if (this.hasGameStarted) { return; }
+    // if (this.hasGameStarted) { return; }
 
     // Tell players the game is starting
     const message: Message = {
