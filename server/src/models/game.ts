@@ -41,19 +41,30 @@ export class Game {
   }
 
   private handleGameStart() {
-    // Start the game
     if (this.hasGameStarted) { return; }
-    this.hasGameStarted = true;
 
-    // TODO: Actually start the game
-
-    // Tell players the game has started
+    // Tell players the game is starting
     const message: Message = {
       type: 'action',
       name: 'game start',
       payload: ''
     };
     this.broadcastToClients(message);
+
+  // Start the game
+  this.hasGameStarted = true;
+  this.players.forEach(player => {
+    player.beginGame(this.startingNumberOfDice);
+  });
+  this.updateClients();
+
+  // TODO: Actually start the game
+  //  X - Send game and player data to clients
+  //      X - Player data is sent from player.beginGame() above
+  // TODO: player data is showing that all dice are null
+  //  2. Clients need to store this data in App.state
+  //  3. Clients need to render based on the state data
+  //      - Action messages are only used for populating the game log
   }
 
   private handleUpdate(player: Player) {

@@ -31,7 +31,7 @@ export class Player {
     const message: Message = {
       type: 'data',
       name: 'player',
-      payload: this.publicDetails
+      payload: pick(this, ['name', 'numDice', 'currentRoll', 'isInGame', 'isTheirTurn', 'lastWager'])
     };
     this.ws.send(JSON.stringify(message));
   }
