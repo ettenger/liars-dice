@@ -8,15 +8,16 @@ import ActionPanel from './components/ActionPanel';
 type AppState = {
   ws?: WebSocket,
   name: string,
-  messages: Message[]
+  messages: Message[],
+  gameData: any[],
+  playerData: any[]
 }
 
 export default class App extends React.Component<{}, AppState> {
   constructor(props: any) {
     super(props);
-    this.state = { name: '', messages: []};
+    this.state = { name: '', messages: [], gameData: [], playerData: [] };
     this.connect = this.connect.bind(this);
-    this.addMessage = this.addMessage.bind(this);
   }
 
   private connect = (name: string) => {
@@ -40,13 +41,24 @@ export default class App extends React.Component<{}, AppState> {
       }
 
       if (message.type === 'action') {
-        this.addMessage(message);
+        // Save action messages to state for the Game Log
+        this.setState({ messages: [...this.state.messages, message] });
+      } else if (message.type === 'data') {
+        switch (message.name) {
+          // Save server data to state
+          case 'game':
+            this.setState({ gameData: message.payload });
+            console.log('App.state.gameData');
+            console.log(this.state.gameData);
+            break;
+          case 'player':
+            this.setState({ playerData: message.payload });
+            console.log('App.state.playerData');
+            console.log(this.state.playerData);
+            break;
+        }
       }
     }
-  }
-
-  private addMessage = (message: Message) => {
-    this.setState({ messages: [...this.state.messages, message] });
   }
 
   private sendMessage = (message: Message) => {

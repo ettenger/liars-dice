@@ -62,7 +62,7 @@ export class Game {
   //  X - Send game and player data to clients
   //      X - Player data is sent from player.beginGame() above
   // TODO: player data is showing that all dice are null
-  //  2. Clients need to store this data in App.state
+  //  X - Clients need to store this data in App.state
   //  3. Clients need to render based on the state data
   //      - Action messages are only used for populating the game log
   }
