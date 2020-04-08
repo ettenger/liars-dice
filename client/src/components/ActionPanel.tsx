@@ -1,5 +1,5 @@
 import React from 'react'; 
-import Message from '../interfaces/message';
+import Message from '../interfaces/Message';
 
 type myProps = {
   messagesSender: any
