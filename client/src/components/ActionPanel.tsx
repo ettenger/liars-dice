@@ -2,7 +2,9 @@ import React from 'react';
 import Message from '../interfaces/Message';
 
 type myProps = {
-  messagesSender: any
+  messagesSender: any,
+  gameData: any[],
+  playerData: any[]
 };
 
 export default class ActionPanel extends React.Component<myProps> {
@@ -23,6 +25,10 @@ export default class ActionPanel extends React.Component<myProps> {
   }
 
   render() {
+    // TODO: Finish rendering the action panel
+    // if (this.props.gameData) {
+      
+    // }
     return (
       <div className="ActionPanel">
         <form onSubmit={this.handleSubmit}>

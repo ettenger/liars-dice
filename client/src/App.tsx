@@ -4,6 +4,8 @@ import NameInput from './components/NameInput';
 import GameLog from './components/GameLog';
 import Message from './interfaces/Message';
 import ActionPanel from './components/ActionPanel';
+import GameData from './interfaces/GameData';
+import PlayerData from './interfaces/PlayerData';
 
 type AppState = {
   ws?: WebSocket,
@@ -29,16 +31,10 @@ export default class App extends React.Component<{}, AppState> {
     };
 
     ws.onmessage = (event: MessageEvent) => {
-      let message: Message;
-      try {
-        message = JSON.parse(event.data) as Message;
-        console.log('Received message object:');
-        console.log(message);
-      } catch (e) {
-        console.log('Unable to parse incoming message!');
-        console.log(event.data);
-        return;
-      }
+      let message: any = this.parseData(event.data,'Message');
+      if (!message) { return; }
+
+      let data: any;
 
       if (message.type === 'action') {
         // Save action messages to state for the Game Log
@@ -47,17 +43,49 @@ export default class App extends React.Component<{}, AppState> {
         switch (message.name) {
           // Save server data to state
           case 'game':
-            this.setState({ gameData: message.payload });
-            console.log('App.state.gameData');
-            console.log(this.state.gameData);
+            data = this.parseData(event.data,'GameData');
+            if (data) {
+              this.setState({ gameData: message.payload });
+            }
             break;
           case 'player':
-            this.setState({ playerData: message.payload });
-            console.log('App.state.playerData');
-            console.log(this.state.playerData);
+            data = this.parseData(event.data,'PlayerData');
+            if (data) {
+              this.setState({ playerData: message.payload });
+            }
             break;
         }
       }
+    }
+  }
+
+  private parseData(inputString: string, outputType: 'Message' | 'GameData' | 'PlayerData' | 'Other') {
+    let output: any;
+
+    try {
+      switch (outputType) {
+        case 'Message':
+          output = JSON.parse(inputString) as Message;
+          break;
+        case 'GameData':
+          output = JSON.parse(inputString) as GameData;
+          break;
+        case 'PlayerData':
+          output = JSON.parse(inputString) as PlayerData;
+          break;
+        default:
+          output = JSON.parse(inputString);
+          break;
+      }
+      console.log('Successfully parsed ' + outputType.toString() + ' object:');
+      console.log(output);
+      return output;
+    } catch (e) {
+      console.log('Unable to parse object! Attempted type: ' + outputType.toString());
+      console.log('inputString:')
+      console.log(inputString);
+      console.log('Error: ' + e.message)
+      return false;
     }
   }
 
@@ -85,7 +113,10 @@ export default class App extends React.Component<{}, AppState> {
             <div className="OpponentStatus"></div>
             <div className="MyDice"></div>
             <GameLog messages = { this.state.messages } />
-            <ActionPanel messagesSender = { this.sendMessage } />
+            <ActionPanel 
+              messagesSender = { this.sendMessage } 
+              gameData = { this.state.gameData } 
+              playerData = { this.state.playerData } />
           </header>
         </div>
       );

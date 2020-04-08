@@ -69,7 +69,7 @@ export class Player {
   }
 
   public roll() {
-    this.currentRoll = new Array(this.numDice).map(this.randNumberOneToSix);
+    this.currentRoll = [...Array(this.numDice)].map(() => this.randNumberOneToSix());
   }
 
   private randNumberOneToSix(): number {

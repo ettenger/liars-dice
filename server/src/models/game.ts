@@ -41,6 +41,7 @@ export class Game {
   }
 
   private handleGameStart() {
+    // TODO: Uncomment this line before going live
     // if (this.hasGameStarted) { return; }
 
     // Tell players the game is starting
@@ -57,14 +58,6 @@ export class Game {
     player.beginGame(this.startingNumberOfDice);
   });
   this.updateClients();
-
-  // TODO: Actually start the game
-  //  X - Send game and player data to clients
-  //      X - Player data is sent from player.beginGame() above
-  // TODO: player data is showing that all dice are null
-  //  X - Clients need to store this data in App.state
-  //  3. Clients need to render based on the state data
-  //      - Action messages are only used for populating the game log
   }
 
   private handleUpdate(player: Player) {
