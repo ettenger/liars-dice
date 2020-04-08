@@ -2,7 +2,7 @@ import React from 'react';
 import './App.css';
 import NameInput from './components/NameInput';
 import GameLog from './components/GameLog';
-import Message from './interfaces/messageobj';
+import Message from './interfaces/Message';
 import ActionPanel from './components/ActionPanel';
 
 type AppState = {
