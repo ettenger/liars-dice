@@ -14,6 +14,7 @@ export default class ActionPanel extends React.Component<myProps> {
     super(props);
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleReset = this.handleReset.bind(this);
   }
 
   handleChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -26,17 +27,30 @@ export default class ActionPanel extends React.Component<myProps> {
     e.preventDefault();
   }
 
+  handleReset(e: React.FormEvent) {
+    const message : Message = { type: 'action', name: 'reset game', payload: {} };
+    this.props.messagesSender(message);
+    e.preventDefault();
+  }
+
   render() {
     // TODO: Finish rendering the action panel
-    // if (this.props.gameData) {
-      
-    // }
-    return (
-      <div className="ActionPanel">
-        <form onSubmit={this.handleSubmit}>
-          <input type="submit" value="Start Game" />
-        </form>
-      </div>
-    );
+    if (this.props.gameData.hasGameStarted) {
+      return (
+        <div className="ActionPanel">
+          <form onSubmit={this.handleReset}>
+            <input type="submit" value="Reset Game" />
+          </form>
+        </div>
+      );
+    } else {
+      return (
+        <div className="ActionPanel">
+          <form onSubmit={this.handleSubmit}>
+            <input type="submit" value="Start Game" />
+          </form>
+        </div>
+      );
+    }
   }
 }

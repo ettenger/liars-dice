@@ -30,6 +30,7 @@ export class Game {
     player.actions.on('wager', wager => this.handleWager(player, wager));
     player.actions.on('updated', playerName => this.handleUpdate(playerName));
     player.actions.on('start game', () => this.handleGameStart());
+    player.actions.on('reset game', () => this.handleGameReset());
   }
 
   beginNewRound() {
@@ -58,6 +59,13 @@ export class Game {
     player.beginGame(this.startingNumberOfDice);
   });
   this.updateClients();
+  }
+
+  private handleGameReset() {
+    this.startingNumberOfDice = 6;
+    this.hasOnesBeenWagered = false;
+    this.hasGameStarted = false;
+    this.updateClients();
   }
 
   private handleUpdate(player: Player) {

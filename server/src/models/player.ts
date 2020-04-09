@@ -100,6 +100,15 @@ export class Player {
         case 'start game':
           this.actions.emit('start game');
           break;
+        case 'reset game':
+          this.actions.emit('reset game');
+          this.numDice = 0;
+          this.currentRoll = [];
+          this.isInGame = false;
+          this.isTheirTurn = false;
+          this.lastWager = null;
+          this.updateClient();
+          break;
       }
     }
   }
