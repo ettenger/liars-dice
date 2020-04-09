@@ -1,10 +1,10 @@
 import Wager from "./Wager";
 
-export default interface PlayerData {
-    name: string;
-    numDice: number;
-    currentRoll: number[];
-    isInGame: boolean;
-    isTheirTurn: boolean;
-    lastWager: Wager;
+export default class PlayerData {
+    name: string = '';
+    numDice: number = 0;
+    currentRoll: number[] = [0];
+    isInGame: boolean = false;
+    isTheirTurn: boolean = false;
+    lastWager: Wager = new Wager();
   }

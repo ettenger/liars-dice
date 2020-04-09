@@ -1,8 +1,8 @@
 import PlayerData from "./PlayerData";
 
-export default interface GameData {
-    players: PlayerData[];
-    startingNumberOfDice: number;
-    hasOnesBeenWagered: boolean;
-    hasGameStarted: boolean;
+export default class GameData {
+    players: PlayerData[] = [new PlayerData()];
+    startingNumberOfDice: number = 0;
+    hasOnesBeenWagered: boolean = false;
+    hasGameStarted: boolean = false;
   }

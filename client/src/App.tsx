@@ -6,19 +6,20 @@ import Message from './interfaces/Message';
 import ActionPanel from './components/ActionPanel';
 import GameData from './interfaces/GameData';
 import PlayerData from './interfaces/PlayerData';
+import DicePanel from './components/DicePanel';
 
 type AppState = {
   ws?: WebSocket,
   name: string,
   messages: Message[],
-  gameData: any[],
-  playerData: any[]
+  gameData: GameData,
+  playerData: PlayerData
 }
 
 export default class App extends React.Component<{}, AppState> {
   constructor(props: any) {
     super(props);
-    this.state = { name: '', messages: [], gameData: [], playerData: [] };
+    this.state = { name: '', messages: [], gameData: new GameData(), playerData: new PlayerData() };
     this.connect = this.connect.bind(this);
   }
 
@@ -111,7 +112,7 @@ export default class App extends React.Component<{}, AppState> {
         <div className="App">
           <header className="App-header">
             <div className="OpponentStatus"></div>
-            <div className="MyDice"></div>
+            { this.state.gameData.hasGameStarted ? <DicePanel playerData = { this.state.playerData } /> : <div></div> }
             <GameLog messages = { this.state.messages } />
             <ActionPanel 
               messagesSender = { this.sendMessage } 

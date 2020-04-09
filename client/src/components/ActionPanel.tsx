@@ -1,10 +1,12 @@
 import React from 'react'; 
 import Message from '../interfaces/Message';
+import GameData from '../interfaces/GameData';
+import PlayerData from '../interfaces/PlayerData';
 
 type myProps = {
   messagesSender: any,
-  gameData: any[],
-  playerData: any[]
+  gameData: GameData,
+  playerData: PlayerData
 };
 
 export default class ActionPanel extends React.Component<myProps> {
