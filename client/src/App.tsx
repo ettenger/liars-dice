@@ -7,6 +7,7 @@ import ActionPanel from './components/ActionPanel';
 import GameData from './interfaces/GameData';
 import PlayerData from './interfaces/PlayerData';
 import DicePanel from './components/DicePanel';
+import StatusTable from './components/StatusTable';
 
 type AppState = {
   ws?: WebSocket,
@@ -111,13 +112,18 @@ export default class App extends React.Component<{}, AppState> {
       return (
         <div className="App">
           <header className="App-header">
-            <div className="OpponentStatus"></div>
-            { this.state.gameData.hasGameStarted ? <DicePanel playerData = { this.state.playerData } /> : <div></div> }
-            <GameLog messages = { this.state.messages } />
-            <ActionPanel 
-              messagesSender = { this.sendMessage } 
-              gameData = { this.state.gameData } 
-              playerData = { this.state.playerData } />
+            <div className="Content-left">
+              { this.state.gameData.hasGameStarted ? <DicePanel playerData = { this.state.playerData } /> : <div></div> }
+              <GameLog messages = { this.state.messages } />
+              <ActionPanel 
+                messagesSender = { this.sendMessage } 
+                gameData = { this.state.gameData } 
+                playerData = { this.state.playerData } 
+              />
+            </div>
+            <div className="Content-right">
+              <StatusTable gameData = { this.state.gameData } />
+            </div>
           </header>
         </div>
       );

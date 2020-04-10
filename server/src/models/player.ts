@@ -5,12 +5,12 @@ import { EventEmitter } from 'events';
 
 export class Player {
   ws: any;
-  name: string;
-  numDice: number;
-  currentRoll: number[];
+  name: string = '';
+  numDice: number = 0;
+  currentRoll: number[] = [0];
   isInGame: boolean = false;
   isTheirTurn: boolean = false;
-  lastWager: Wager;
+  lastWager: Wager = {};
   actions = new EventEmitter();
 
   constructor(ws) {
