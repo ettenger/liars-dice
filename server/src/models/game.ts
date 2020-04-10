@@ -33,7 +33,7 @@ export class Game {
     player.actions.on('reset game', () => this.handleGameReset());
   }
 
-  beginNewRound() {
+  private beginNewRound() {
     this.hasOnesBeenWagered = false;
     this.players.forEach(player => {
       player.beginNewRound();
@@ -42,8 +42,7 @@ export class Game {
   }
 
   private handleGameStart() {
-    // TODO: Uncomment this line before going live
-    // if (this.hasGameStarted) { return; }
+    if (this.hasGameStarted) { return; }
 
     // Tell players the game is starting
     const message: Message = {
@@ -53,12 +52,14 @@ export class Game {
     };
     this.broadcastToClients(message);
 
-  // Start the game
-  this.hasGameStarted = true;
-  this.players.forEach(player => {
-    player.beginGame(this.startingNumberOfDice);
-  });
-  this.updateClients();
+    // Start the game
+    this.hasGameStarted = true;
+    this.hasOnesBeenWagered = false;
+    this.shuffle(this.players);
+    this.players.forEach(player => {
+      player.beginGame(this.startingNumberOfDice);
+    });
+    this.updateClients();
   }
 
   private handleGameReset() {
@@ -154,5 +155,24 @@ export class Game {
     } else {
       return this.players[currentPlayerIndex - 1];
     }
+  }
+
+  private shuffle(array:Array<any>) {
+    var currentIndex = array.length, temporaryValue: any, randomIndex: number;
+
+    // While there remain elements to shuffle...
+    while (0 !== currentIndex) {
+  
+      // Pick a remaining element...
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex -= 1;
+  
+      // And swap it with the current element.
+      temporaryValue = array[currentIndex];
+      array[currentIndex] = array[randomIndex];
+      array[randomIndex] = temporaryValue;
+    }
+  
+    return array;
   }
 }
