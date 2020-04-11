@@ -67,6 +67,9 @@ export class Game {
     this.startingNumberOfDice = 6;
     this.hasOnesBeenWagered = false;
     this.hasGameStarted = false;
+    this.players.forEach(player => {
+      player.isTheirTurn = false;
+    });
     this.updateClients();
   }
 

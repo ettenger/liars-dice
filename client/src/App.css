@@ -2,11 +2,6 @@
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
     animation: App-logo-spin infinite 20s linear;
@@ -18,10 +13,12 @@
   min-height: 100vh;
   display: flex;
   flex-direction: row;
-  align-items: center;
+  /* align-items: center; */
   justify-content: center;
   font-size: calc(10px + 2vmin);
   color: white;
+  padding-top: 1vh;
+  padding-bottom: 1vh;
 }
 
 .Content-left {
@@ -64,6 +61,25 @@ th:nth-child(2) {
 
 td:nth-child(2) {
   text-align: right;
+}
+
+.img-dice {
+  max-height: 100px;
+  max-width: 100px;
+}
+
+.status-div {
+  height: 97vh;
+  overflow: scroll;
+}
+
+.Gamelog {
+  overflow: scroll;
+  height: 60vh;
+}
+
+.DicePanel {
+  min-height: 20vh;
 }
 
 @keyframes App-logo-spin {
