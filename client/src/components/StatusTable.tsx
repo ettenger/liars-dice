@@ -32,6 +32,10 @@ export default class StatusTable extends React.Component<myProps> {
                 player={player}
               />,
             )}
+            <tr>
+              <td><strong>Total</strong></td>
+              <td><strong>{ this.props.gameData.numDiceRemaining }</strong></td>
+            </tr>
           </tbody>
         </table>
       </div>

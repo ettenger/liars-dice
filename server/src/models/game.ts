@@ -56,6 +56,7 @@ export class Game {
     this.hasGameStarted = true;
     this.hasOnesBeenWagered = false;
     this.shuffle(this.players);
+    this.players[0].isTheirTurn = true;
     this.players.forEach(player => {
       player.beginGame(this.startingNumberOfDice);
     });
