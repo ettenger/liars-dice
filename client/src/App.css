@@ -40,6 +40,32 @@
   color: #ffc400;
 }
 
+.Status-table {
+  border-collapse: collapse;
+}
+
+tr {
+  border-bottom: 1px solid #525252;
+}
+
+th:first-child {
+  padding-right: 20px;
+  text-align: left;
+}
+
+td:first-child {
+  padding-right: 20px;
+  text-align: left;
+}
+
+th:nth-child(2) {
+  text-align: right;
+}
+
+td:nth-child(2) {
+  text-align: right;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);

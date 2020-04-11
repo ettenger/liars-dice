@@ -18,7 +18,6 @@ export default class StatusTable extends React.Component<myProps> {
   }
 
   render() {
-    // TODO: Use react-table to make this pretty: https://github.com/tannerlinsley/react-table
     return (
       <div>
         <table className="Status-table">
