@@ -10,7 +10,7 @@ export default class StatusTable extends React.Component<myProps> {
 
   private GameDice = (props: { key: any, player: PlayerData }) => {
     return (
-      <tr>
+      <tr className={props.player.isTheirTurn ? 'highlight-text' : ''}>
         <td>{ props.player.name }</td>
         <td>{ props.player.numDice }</td>
       </tr>

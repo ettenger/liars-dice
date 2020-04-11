@@ -36,6 +36,10 @@
   color: #61dafb;
 }
 
+.highlight-text {
+  color: #ffc400;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
