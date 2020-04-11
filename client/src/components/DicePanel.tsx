@@ -8,11 +8,13 @@ type myProps = {
 export default class DicePanel extends React.Component<myProps> {
 
   private GameDice = (props: { key: any, num: Number }) => {
+    if (props.num===0) { return(<span></span>); }
     return (
       <img 
         src={"../images/dice"+ props.num.toString() + ".svg"} 
         alt={props.num.toString()} 
         height="100%" 
+        width="height"
         className="img-dice">
       </img>
     );

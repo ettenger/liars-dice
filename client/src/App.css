@@ -76,10 +76,12 @@ td:nth-child(2) {
 .Gamelog {
   overflow: scroll;
   height: 60vh;
+  display: flex;
+  flex-direction: column-reverse;
 }
 
 .DicePanel {
-  min-height: 20vh;
+  height: 20vh;
 }
 
 @keyframes App-logo-spin {

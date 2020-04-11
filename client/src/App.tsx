@@ -113,7 +113,10 @@ export default class App extends React.Component<{}, AppState> {
         <div className="App">
           <header className="App-header">
             <div className="Content-left">
-              { this.state.gameData.hasGameStarted ? <DicePanel playerData = { this.state.playerData } /> : <div></div> }
+              { this.state.gameData.hasGameStarted ? 
+                <DicePanel playerData = { this.state.playerData } /> : 
+                <div className="DicePanel"></div> 
+              }
               <GameLog messages = { this.state.messages } />
               <ActionPanel 
                 messagesSender = { this.sendMessage } 
