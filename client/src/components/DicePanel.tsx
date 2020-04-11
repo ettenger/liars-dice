@@ -14,7 +14,7 @@ export default class DicePanel extends React.Component<myProps> {
         src={"../images/dice"+ props.num.toString() + ".svg"} 
         alt={props.num.toString()} 
         height="100%" 
-        width="height"
+        width="15%"
         className="img-dice">
       </img>
     );

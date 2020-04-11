@@ -23,6 +23,9 @@
 
 .Content-left {
   width:70%; 
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .Content-right {
@@ -71,17 +74,27 @@ td:nth-child(2) {
 .status-div {
   height: 97vh;
   overflow: scroll;
+  display: flex;
+  justify-content: center;
 }
 
 .Gamelog {
   overflow: scroll;
-  height: 60vh;
+  max-height: 60vh;
   display: flex;
   flex-direction: column-reverse;
+  flex-grow: 1;
 }
 
 .DicePanel {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   height: 20vh;
+}
+
+.Action-panel {
+  padding-bottom: 10px;
 }
 
 @keyframes App-logo-spin {

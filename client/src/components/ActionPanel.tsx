@@ -37,7 +37,7 @@ export default class ActionPanel extends React.Component<myProps> {
     // TODO: Finish rendering the action panel
     if (this.props.gameData.hasGameStarted) {
       return (
-        <div className="ActionPanel">
+        <div className="Action-panel">
           <form onSubmit={this.handleReset}>
             <input type="submit" value="Reset Game" />
           </form>
@@ -45,7 +45,7 @@ export default class ActionPanel extends React.Component<myProps> {
       );
     } else {
       return (
-        <div className="ActionPanel">
+        <div className="Action-panel">
           <form onSubmit={this.handleSubmit}>
             <input type="submit" value="Start Game" />
           </form>
