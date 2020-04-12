@@ -78,12 +78,10 @@ export class Game {
   }
 
   private handleUpdate(player: Player) {
-    const message: Message = {
-      type: 'action',
-      name: 'player join',
-      payload: player.name
-    };
+    // Send action message to clients for the game log
+    const message: Message = { type: 'action', name: 'player join', payload: player.name};
     this.broadcastToClients(message);
+
     // Send state data to clients for rendering
     this.updateClients();
     player.updateClient();
@@ -132,6 +130,10 @@ export class Game {
   }
 
   private handleWager(player: Player, wager: Wager) {
+    // Send action message to clients for the game log
+    const message: Message = { type: 'action', name: 'wager', payload: {player: player.name, wager: wager}};
+    this.broadcastToClients(message);
+    
     const currentPlayerIndex = this.getPlayerIndex(player);
 
     if (wager.callBullshit) {

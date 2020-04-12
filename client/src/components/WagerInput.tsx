@@ -2,6 +2,7 @@ import React from 'react';
 import Message from '../interfaces/Message';
 import GameData from '../interfaces/GameData';
 import PlayerData from '../interfaces/PlayerData';
+import Wager from '../interfaces/Wager';
 
 type myProps = {
   messagesSender: any,
@@ -19,9 +20,9 @@ type myState = {
 export default class WagerInput extends React.Component<myProps, myState> {
   constructor(props: myProps) {
     super(props);
-    this.handleSubmit = this.handleSubmit.bind(this);
     this.changeWagerNum = this.changeWagerNum.bind(this);
-    this.state = { minDiceNum: 0, minDiceQty: 0, currentNum: 0, currentQty: 0 }
+    this.placeWager = this.placeWager.bind(this);
+    this.state = { minDiceNum: 0, minDiceQty: 0, currentNum: 0, currentQty: 0 };
   }
 
   componentDidMount() {
@@ -45,8 +46,9 @@ export default class WagerInput extends React.Component<myProps, myState> {
     }
   }
 
-  private handleSubmit() {
-    const message : Message = { type: 'action', name: 'start game', payload: {} };
+  private placeWager(calledBS: boolean = false) {
+    const wager : Wager = { callBullshit: calledBS, num: this.state.currentNum, qty: this.state.currentQty }
+    const message : Message = { type: 'action', name: 'wager', payload: wager };
     this.props.messagesSender(message);
   }
 
@@ -113,7 +115,7 @@ export default class WagerInput extends React.Component<myProps, myState> {
     );
   }
 
-  private sensitiveButton = (props: { label: string, onClick: any, sensitivityControl: any }) => {
+  private sensitiveButton = (props: { label: string, onClick: any, sensitivityControl: boolean }) => {
     if (props.sensitivityControl) {
       return (<button type="submit" onClick={props.onClick}>{props.label}</button>);
     } else {
@@ -157,7 +159,7 @@ export default class WagerInput extends React.Component<myProps, myState> {
         <div>
           <this.sensitiveButton 
             label='Submit Wager' 
-            onClick={''} 
+            onClick={() => this.placeWager()} 
             sensitivityControl={this.props.playerData.isTheirTurn}
           />
         </div>
@@ -165,8 +167,8 @@ export default class WagerInput extends React.Component<myProps, myState> {
         <div>
           <this.sensitiveButton 
             label='Call BS' 
-            onClick={''} 
-            sensitivityControl={this.props.playerData.isTheirTurn}
+            onClick={() => this.placeWager(true)} 
+            sensitivityControl={this.props.playerData.isTheirTurn && (this.state.minDiceNum > 1 || this.state.minDiceQty > 1)}
           />
         </div>
       </div>
