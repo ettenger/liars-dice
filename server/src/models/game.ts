@@ -36,6 +36,7 @@ export class Game {
   }
 
   private beginNewRound() {
+    this.sendAction('round start','');
     this.hasOnesBeenWagered = false;
     this.players.forEach(player => {
       player.beginNewRound();
@@ -47,12 +48,7 @@ export class Game {
     if (this.hasGameStarted) { return; }
 
     // Tell players the game is starting
-    const message: Message = {
-      type: 'action',
-      name: 'game start',
-      payload: ''
-    };
-    this.broadcastToClients(message);
+    this.sendAction('game start','');
 
     // Start the game
     this.hasGameStarted = true;
@@ -63,6 +59,8 @@ export class Game {
     this.players.forEach(player => {
       player.beginGame(this.startingNumberOfDice);
     });
+
+    // Send state data
     this.updateClients();
   }
 
@@ -77,10 +75,15 @@ export class Game {
     this.updateClients();
   }
 
+  private sendAction(actionName: string, payload: any) {
+    // Send action message to clients for the game log
+    const message: Message = { type: 'action', name: actionName, payload: payload};
+    this.broadcastToClients(message);
+  }
+
   private handleUpdate(player: Player) {
     // Send action message to clients for the game log
-    const message: Message = { type: 'action', name: 'player join', payload: player.name};
-    this.broadcastToClients(message);
+    this.sendAction('player join', player.name)
 
     // Send state data to clients for rendering
     this.updateClients();
@@ -114,26 +117,33 @@ export class Game {
 
     const allDice: number[] = this.players.map(p => p.currentRoll).reduce((a, b) => a.concat(b), []);
     const count = allDice.filter(counterFxn).length;
-    return count >= wager.num;
+
+    // Notify clients of the result
+    // TODO: Need to reveal everybody's dice to the players
+    this.sendAction('dice reveal',{count: count, num: wager.num});
+
+    return count >= wager.qty;
   }
 
   private calledBullshit(caller: Player, previousPlayer: Player) {
-    // TODO: Need to reveal everybody's dice to the players
     const wagerToTest = previousPlayer.lastWager;
     const wagerWasSafe = this.testWager(wagerToTest);
     if (wagerWasSafe) {
       caller.loseOneDie();
+      this.sendAction('lose die', caller.name);
     } else {
       previousPlayer.loseOneDie()
+      this.sendAction('lose die', previousPlayer.name);
     }
+    // TODO: Handle end of player and end of game scenarios
+    this.lastWager = {};
     this.beginNewRound();
   }
 
   private handleWager(player: Player, wager: Wager) {
-    // Send action message to clients for the game log
-    const message: Message = { type: 'action', name: 'wager', payload: {player: player.name, wager: wager}};
-    this.broadcastToClients(message);
-
+    // Tell players a wager was made
+    this.sendAction('wager', {player: player.name, wager: wager});
+    
     const currentPlayerIndex = this.getPlayerIndex(player);
 
     if (wager.callBullshit) {

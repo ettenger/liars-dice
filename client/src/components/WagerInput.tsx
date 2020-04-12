@@ -33,7 +33,6 @@ export default class WagerInput extends React.Component<myProps, myState> {
 
   private updateState() {
     if (this.props.gameData.lastWager.num && this.props.gameData.lastWager.qty) {
-      console.log('Setting state data!');
       let minNum = this.props.gameData.lastWager.num !== 6 ? this.props.gameData.lastWager.num + 1 : 1;
       let minQty = this.props.gameData.lastWager.num !== 6 ? this.props.gameData.lastWager.qty : this.props.gameData.lastWager.qty + 1;
       

@@ -31,9 +31,9 @@ export default class ActionPanel extends React.Component<myProps> {
     if (this.props.gameData.hasGameStarted) {
       return (
         <div className="Action-panel">
-          <div className="Reset-btn-div">
+          {/* <div className="Reset-btn-div">
             <button type="submit" value="Reset Game" onClick={this.handleReset}>Reset Game</button> 
-          </div>
+          </div> */}
           <WagerInput 
             messagesSender = {this.props.messagesSender} 
             gameData = {this.props.gameData} 

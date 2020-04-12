@@ -14,7 +14,7 @@ export default class GameLog extends React.Component<myProps> {
     if (props.message.type === 'action') {
       switch (props.message.name) {
         case 'player join':
-          returnVal = <span style={{color: 'green'}}>{props.message.payload} joined the game<br/></span>;
+          returnVal = <span style={{color: '#9b9b9b'}}>{props.message.payload} joined the game<br/></span>;
           break;
         case 'game start':
           returnVal = <span style={{color: 'cyan'}}>The game is starting!<br/></span>;
@@ -25,6 +25,17 @@ export default class GameLog extends React.Component<myProps> {
               <span style={{color: '#ffc400'}}>{props.message.payload.player}: </span>
               <span style={{color: 'white'}}>{this.formatWager(props.message.payload.wager)}<br/></span>
             </span>
+          break;
+        case 'dice reveal':
+          const tempWager: Wager = { callBullshit: false, num: props.message.payload.num, qty: props.message.payload.count}
+          returnVal = <span style={{color: '#d842a6'}}>There {props.message.payload.count > 1 ? 'are':'is'} {this.formatWager(tempWager)}<br/></span>
+          break;
+        case 'lose die':
+          returnVal = <span style={{color: '#d842a6'}}>{props.message.payload} loses a die<br/></span>
+          break;
+        case 'round start':
+          returnVal = <span style={{color: 'cyan'}}>Starting a new round!<br/></span>;
+          break;
       }
     } 
 
