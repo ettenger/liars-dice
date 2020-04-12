@@ -1,10 +1,12 @@
 import React from 'react'; 
 import Message from '../interfaces/Message';
 import GameData from '../interfaces/GameData';
+import PlayerData from '../interfaces/PlayerData';
 
 type myProps = {
   messagesSender: any,
-  gameData: GameData
+  gameData: GameData,
+  playerData: PlayerData
 };
 
 type myState = {
@@ -99,7 +101,7 @@ export default class WagerInput extends React.Component<myProps, myState> {
     }
   }
 
-  private GameDice = (props: { num: Number }) => {
+  private gameDice = (props: { num: Number }) => {
     if (props.num===0) { return(<span></span>); }
     return (
       <img 
@@ -111,21 +113,61 @@ export default class WagerInput extends React.Component<myProps, myState> {
     );
   }
 
+  private sensitiveButton = (props: { label: string, onClick: any, sensitivityControl: any }) => {
+    if (props.sensitivityControl) {
+      return (<button type="submit" onClick={props.onClick}>{props.label}</button>);
+    } else {
+      return (<button type="submit" onClick={props.onClick} disabled>{props.label}</button>);
+    }
+  }
+
   render() {
     return (
       <div className="Wager-input">
+        <div style={{margin: "0 5px"}}>Enter a wager:</div>
         <div className="div-vertical-btns">
-          <button type="submit" onClick={() => this.changeWagerQty('increase')}>+</button>
-          <button type="submit" onClick={() => this.changeWagerQty('decrease')}>-</button>
+          <this.sensitiveButton 
+            label='+' 
+            onClick={() => this.changeWagerQty('increase')} 
+            sensitivityControl={this.props.playerData.isTheirTurn}
+          />
+          <this.sensitiveButton 
+            label='-' 
+            onClick={() => this.changeWagerQty('decrease')} 
+            sensitivityControl={this.props.playerData.isTheirTurn}
+          />
         </div>
         <div>
           { this.state.currentQty }
         </div>
         <div style={{margin: "0 5px"}}>x</div>
-        <this.GameDice num = { this.state.currentNum ? this.state.currentNum : 1 } />
+        <this.gameDice num = { this.state.currentNum ? this.state.currentNum : 1 } />
         <div className="div-vertical-btns">
-          <button type="submit" onClick={() => this.changeWagerNum('increase')}>+</button>
-          <button type="submit" onClick={() => this.changeWagerNum('decrease')}>-</button>
+          <this.sensitiveButton 
+            label='+' 
+            onClick={() => this.changeWagerNum('increase')} 
+            sensitivityControl={this.props.playerData.isTheirTurn}
+          />
+          <this.sensitiveButton 
+            label='-' 
+            onClick={() => this.changeWagerNum('decrease')} 
+            sensitivityControl={this.props.playerData.isTheirTurn}
+          />
+        </div>
+        <div>
+          <this.sensitiveButton 
+            label='Submit Wager' 
+            onClick={''} 
+            sensitivityControl={this.props.playerData.isTheirTurn}
+          />
+        </div>
+        <div style={{margin: "0 5px"}}>or</div>
+        <div>
+          <this.sensitiveButton 
+            label='Call BS' 
+            onClick={''} 
+            sensitivityControl={this.props.playerData.isTheirTurn}
+          />
         </div>
       </div>
     );

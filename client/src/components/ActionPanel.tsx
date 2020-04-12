@@ -2,10 +2,12 @@ import React from 'react';
 import Message from '../interfaces/Message';
 import GameData from '../interfaces/GameData';
 import WagerInput from './WagerInput';
+import PlayerData from '../interfaces/PlayerData';
 
 type myProps = {
   messagesSender: any,
-  gameData: GameData
+  gameData: GameData,
+  playerData: PlayerData
 };
 
 export default class ActionPanel extends React.Component<myProps> {
@@ -35,6 +37,7 @@ export default class ActionPanel extends React.Component<myProps> {
           <WagerInput 
             messagesSender = {this.props.messagesSender} 
             gameData = {this.props.gameData} 
+            playerData = {this.props.playerData}
           />
         </div>
       );

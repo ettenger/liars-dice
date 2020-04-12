@@ -121,6 +121,7 @@ export default class App extends React.Component<{}, AppState> {
               <ActionPanel 
                 messagesSender = { this.sendMessage } 
                 gameData = { this.state.gameData } 
+                playerData = { this.state.playerData }
               />
             </div>
             <div className="Content-right">

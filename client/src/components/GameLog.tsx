@@ -10,7 +10,6 @@ export default class GameLog extends React.Component<myProps> {
   private GameLogMessage = (props: { key: any, message: Message }) => {
     let returnVal: any;
 
-    // const actionData = { kind: 'player add', data: player.name };
     if (props.message.type === 'action') {
       switch (props.message.name) {
         case 'player join':
