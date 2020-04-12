@@ -48,6 +48,18 @@ export default class WagerInput extends React.Component<myProps, myState> {
     this.props.messagesSender(message);
   }
 
+  private changeWagerQty(direction: 'increase' | 'decrease') {
+    let currentQty = this.state.currentQty;
+    let minQty = this.state.minDiceQty;
+    let diceRemaining = this.props.gameData.numDiceRemaining;
+
+    if ((direction==='increase') && (currentQty < diceRemaining)) {
+      this.setState({ currentQty: currentQty + 1 });  
+    } else if ((direction==='decrease') && (currentQty > minQty)) {
+      this.setState({ currentQty: currentQty - 1 });  
+    }
+  }
+
   private changeWagerNum(direction: 'increase' | 'decrease') {
     let currentNum = this.state.currentNum;
     let currentQty = this.state.currentQty;
@@ -93,7 +105,7 @@ export default class WagerInput extends React.Component<myProps, myState> {
       <img 
         src={"../images/dice"+ props.num.toString() + ".svg"} 
         alt={props.num.toString()} 
-        height="40px" 
+        height="45px" 
         className="img-dice">
       </img>
     );
@@ -103,12 +115,17 @@ export default class WagerInput extends React.Component<myProps, myState> {
     return (
       <div className="Wager-input">
         <div className="div-vertical-btns">
-          <button type="submit" onClick={() => this.changeWagerNum('increase')}>+</button>
-          <button type="submit" onClick={() => this.changeWagerNum('decrease')}>-</button>
+          <button type="submit" onClick={() => this.changeWagerQty('increase')}>+</button>
+          <button type="submit" onClick={() => this.changeWagerQty('decrease')}>-</button>
         </div>
-        <this.GameDice num = { this.state.currentNum ? this.state.currentNum : 1 } />
         <div>
           { this.state.currentQty }
+        </div>
+        <div style={{margin: "0 5px"}}>x</div>
+        <this.GameDice num = { this.state.currentNum ? this.state.currentNum : 1 } />
+        <div className="div-vertical-btns">
+          <button type="submit" onClick={() => this.changeWagerNum('increase')}>+</button>
+          <button type="submit" onClick={() => this.changeWagerNum('decrease')}>-</button>
         </div>
       </div>
     );

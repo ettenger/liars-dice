@@ -108,7 +108,7 @@ td:nth-child(2) {
   min-height: 70px;
 }
 
-.div-vertical-btns {
+.Wager-input .div-vertical-btns {
   display: flex;
   flex-direction: column;
   justify-content: center;
