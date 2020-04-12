@@ -22,11 +22,18 @@ export default class WagerInput extends React.Component<myProps, myState> {
     super(props);
     this.changeWagerNum = this.changeWagerNum.bind(this);
     this.placeWager = this.placeWager.bind(this);
+    this.updateState = this.updateState.bind(this);
+    this.legalWagerChange = this.legalWagerChange.bind(this);
     this.state = { minDiceNum: 0, minDiceQty: 0, currentNum: 0, currentQty: 0 };
   }
 
   componentDidMount() {
+    this.updateState();
+  }
+
+  private updateState() {
     if (this.props.gameData.lastWager.num && this.props.gameData.lastWager.qty) {
+      console.log('Setting state data!');
       let minNum = this.props.gameData.lastWager.num !== 6 ? this.props.gameData.lastWager.num + 1 : 1;
       let minQty = this.props.gameData.lastWager.num !== 6 ? this.props.gameData.lastWager.qty : this.props.gameData.lastWager.qty + 1;
       
@@ -53,15 +60,45 @@ export default class WagerInput extends React.Component<myProps, myState> {
   }
 
   private changeWagerQty(direction: 'increase' | 'decrease') {
+    let currentNum = this.state.currentNum;
     let currentQty = this.state.currentQty;
     let minQty = this.state.minDiceQty;
+    let minNum = this.state.minDiceNum;
     let diceRemaining = this.props.gameData.numDiceRemaining;
 
     if ((direction==='increase') && (currentQty < diceRemaining)) {
       this.setState({ currentQty: currentQty + 1 });  
+    } else if ((direction==='decrease') && (currentQty === (minQty+1)) && currentNum < minNum) {
+      this.setState({ currentQty: currentQty - 1, currentNum: minNum });  
     } else if ((direction==='decrease') && (currentQty > minQty)) {
       this.setState({ currentQty: currentQty - 1 });  
     }
+  }
+
+  private legalWagerChange(direction: 'increase' | 'decrease') {
+    let currentNum = this.state.currentNum;
+    let currentQty = this.state.currentQty;
+    let minQty = this.state.minDiceQty;
+    let minNum = this.state.minDiceNum;
+    let diceRemaining = this.props.gameData.numDiceRemaining;
+    let returnVal: boolean = false;
+
+    if (direction==='increase' && currentNum === 6) {
+      if (currentQty < diceRemaining) {
+        returnVal = true;
+      }
+    } else if (direction==='increase') {
+      returnVal = true;
+    } else if (direction==='decrease' && currentNum === 1) {
+      if (minQty < currentQty) {
+        returnVal = true;
+      }
+    } else if (direction==='decrease') {
+      if (!(currentQty===minQty && currentNum===minNum)) {
+        returnVal = true;
+      }
+    }
+    return returnVal;
   }
 
   private changeWagerNum(direction: 'increase' | 'decrease') {
@@ -88,7 +125,7 @@ export default class WagerInput extends React.Component<myProps, myState> {
       switch (true) {
         case currentNum > 1:
           //Only allow legal wagers
-          if (currentNum > minNum && currentQty >= minQty) {
+          if (!(currentQty===minQty && currentNum===minNum)) {
             this.setState({ currentNum: currentNum - 1 });
           }
           break;
@@ -122,6 +159,13 @@ export default class WagerInput extends React.Component<myProps, myState> {
       return (<button type="submit" onClick={props.onClick} disabled>{props.label}</button>);
     }
   }
+  componentDidUpdate(prevProps: myProps) {
+    if ((this.props.gameData.lastWager.num !== prevProps.gameData.lastWager.num)
+      || (this.props.gameData.lastWager.qty !== prevProps.gameData.lastWager.qty)
+      || (this.props.gameData.numDiceRemaining !== prevProps.gameData.numDiceRemaining)) {
+        this.updateState();
+    }
+  }
 
   render() {
     return (
@@ -131,12 +175,12 @@ export default class WagerInput extends React.Component<myProps, myState> {
           <this.sensitiveButton 
             label='+' 
             onClick={() => this.changeWagerQty('increase')} 
-            sensitivityControl={this.props.playerData.isTheirTurn}
+            sensitivityControl={this.props.playerData.isTheirTurn && (this.state.currentQty < this.props.gameData.numDiceRemaining)}
           />
           <this.sensitiveButton 
             label='-' 
             onClick={() => this.changeWagerQty('decrease')} 
-            sensitivityControl={this.props.playerData.isTheirTurn}
+            sensitivityControl={this.props.playerData.isTheirTurn && (this.state.currentQty > this.state.minDiceQty)}
           />
         </div>
         <div>
@@ -148,12 +192,12 @@ export default class WagerInput extends React.Component<myProps, myState> {
           <this.sensitiveButton 
             label='+' 
             onClick={() => this.changeWagerNum('increase')} 
-            sensitivityControl={this.props.playerData.isTheirTurn}
+            sensitivityControl={this.props.playerData.isTheirTurn && this.legalWagerChange('increase')}
           />
           <this.sensitiveButton 
             label='-' 
             onClick={() => this.changeWagerNum('decrease')} 
-            sensitivityControl={this.props.playerData.isTheirTurn}
+            sensitivityControl={this.props.playerData.isTheirTurn && this.legalWagerChange('decrease')}
           />
         </div>
         <div>

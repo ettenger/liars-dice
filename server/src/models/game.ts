@@ -133,7 +133,7 @@ export class Game {
     // Send action message to clients for the game log
     const message: Message = { type: 'action', name: 'wager', payload: {player: player.name, wager: wager}};
     this.broadcastToClients(message);
-    
+
     const currentPlayerIndex = this.getPlayerIndex(player);
 
     if (wager.callBullshit) {

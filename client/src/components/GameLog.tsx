@@ -33,7 +33,9 @@ export default class GameLog extends React.Component<myProps> {
 
   private formatWager(wager: Wager) {
     let numberStrings = ['one', 'two', 'three', 'four', 'five', 'six']
-    if (wager.num && wager.qty) {
+    if (wager.callBullshit) {
+      return 'Bullshit!';
+    } else if (wager.num && wager.qty) {
       return (wager.qty + ' ' + numberStrings[wager.num-1] + ((wager.qty > 1 ) ? ((wager.num===6) ? 'es' : 's') : ''));
     }
   }
