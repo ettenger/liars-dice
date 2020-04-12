@@ -28,7 +28,7 @@ export default class App extends React.Component<{}, AppState> {
     const ws = new WebSocket('ws://localhost:8080');
     
     ws.onopen = () => {
-        this.setState({ ws: ws, name:name })
+        this.setState({ ws: ws, name: name })
         ws.send(JSON.stringify({ type: 'data', name: 'name', payload: name}));
     };
 

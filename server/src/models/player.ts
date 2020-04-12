@@ -106,7 +106,7 @@ export class Player {
           this.currentRoll = [];
           this.isInGame = false;
           this.isTheirTurn = false;
-          this.lastWager = null;
+          this.lastWager = {};
           this.updateClient();
           break;
       }

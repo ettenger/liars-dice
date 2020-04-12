@@ -7,6 +7,7 @@ export class Game {
   startingNumberOfDice: number = 6;
   hasOnesBeenWagered: boolean = false;
   hasGameStarted: boolean = false;
+  lastWager: Wager = {};
 
   constructor() {
   }
@@ -20,7 +21,8 @@ export class Game {
       players: this.players.map(p => p.publicDetails),
       numDiceRemaining: this.numDiceRemaining,
       hasOnesBeenWagered: this.hasOnesBeenWagered,
-      hasGameStarted: this.hasGameStarted
+      hasGameStarted: this.hasGameStarted,
+      lastWager: this.lastWager
     }
   }
 
@@ -55,6 +57,7 @@ export class Game {
     // Start the game
     this.hasGameStarted = true;
     this.hasOnesBeenWagered = false;
+    this.lastWager = {};
     this.shuffle(this.players);
     this.players[0].isTheirTurn = true;
     this.players.forEach(player => {
@@ -67,6 +70,7 @@ export class Game {
     this.startingNumberOfDice = 6;
     this.hasOnesBeenWagered = false;
     this.hasGameStarted = false;
+    this.lastWager = {};
     this.players.forEach(player => {
       player.isTheirTurn = false;
     });
@@ -104,10 +108,10 @@ export class Game {
   private testWager(wager: Wager): boolean {
     let counterFxn;
     if (this.hasOnesBeenWagered) {
-      counterFxn = d => d === wager.die;
+      counterFxn = d => d === wager.num;
     } else {
       // Ones are wild unless they've been called
-      counterFxn = d => d === wager.die || d === 1;
+      counterFxn = d => d === wager.num || d === 1;
     }
 
     const allDice: number[] = this.players.map(p => p.currentRoll).reduce((a, b) => a.concat(b), []);
@@ -134,7 +138,8 @@ export class Game {
       const previousPlayer = this.getPreviousPlayer(currentPlayerIndex);
       this.calledBullshit(player, previousPlayer);
     } else {
-      if (wager.die === 1) {
+      this.lastWager = wager;
+      if (wager.num === 1) {
         this.hasOnesBeenWagered = true;
       }
     }
