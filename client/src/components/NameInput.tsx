@@ -8,7 +8,7 @@ type myState = {
   value: string
 }
 
-export class NameInput extends React.Component<myProps, myState> {
+export default class NameInput extends React.Component<myProps, myState> {
   constructor(props: myProps) {
     super(props);
     this.state = { value: '' };
@@ -28,12 +28,10 @@ export class NameInput extends React.Component<myProps, myState> {
   render() {
     return (
       <form onSubmit={this.handleSubmit}>
-        <label>What should we call you?</label><br></br>
-        <input type="text" value={this.state.value} onChange={this.handleChange} /><br></br>
+        <label>What should we call you?</label><br/>
+        <input type="text" value={this.state.value} onChange={this.handleChange} autoFocus/><br/>
         <input type="submit" value="Submit" />
       </form>
     );
   }
 }
-
-export default NameInput;

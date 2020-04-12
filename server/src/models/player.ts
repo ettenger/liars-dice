@@ -5,12 +5,12 @@ import { EventEmitter } from 'events';
 
 export class Player {
   ws: any;
-  name: string;
-  numDice: number;
-  currentRoll: number[];
+  name: string = '';
+  numDice: number = 0;
+  currentRoll: number[] = [0];
   isInGame: boolean = false;
   isTheirTurn: boolean = false;
-  lastWager: Wager;
+  lastWager: Wager = {};
   actions = new EventEmitter();
 
   constructor(ws) {
@@ -24,14 +24,14 @@ export class Player {
 
   public setName(name: string) {
     this.name = name;
-    this.actions.emit('updated');
+    this.actions.emit('updated', this);
   }
 
   public updateClient() {
     const message: Message = {
       type: 'data',
       name: 'player',
-      payload: this
+      payload: pick(this, ['name', 'numDice', 'currentRoll', 'isInGame', 'isTheirTurn', 'lastWager'])
     };
     this.ws.send(JSON.stringify(message));
   }
@@ -69,7 +69,7 @@ export class Player {
   }
 
   public roll() {
-    this.currentRoll = new Array(this.numDice).map(this.randNumberOneToSix);
+    this.currentRoll = [...Array(this.numDice)].map(() => this.randNumberOneToSix());
   }
 
   private randNumberOneToSix(): number {
@@ -77,9 +77,10 @@ export class Player {
   }
 
   private handleClientMessage(data: string) {
-    let message;
+    let message: Message;
     try {
       message = JSON.parse(data) as Message;
+      console.log(message);
     } catch (e) {
       console.log(e, data);
       return;
@@ -95,6 +96,18 @@ export class Player {
       switch (message.name) {
         case 'wager':
           this.placeWager(message.payload);
+          break;
+        case 'start game':
+          this.actions.emit('start game');
+          break;
+        case 'reset game':
+          this.actions.emit('reset game');
+          this.numDice = 0;
+          this.currentRoll = [];
+          this.isInGame = false;
+          this.isTheirTurn = false;
+          this.lastWager = {};
+          this.updateClient();
           break;
       }
     }
