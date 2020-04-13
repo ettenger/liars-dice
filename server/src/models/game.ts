@@ -30,18 +30,17 @@ export class Game {
     this.players.push(player);
     // TODO: Remove event listener when player leaves
     player.actions.on('wager', wager => this.handleWager(player, wager));
-    player.actions.on('updated', player => this.handleUpdate(player));
+    player.actions.on('updated', plyr => this.handleUpdate(plyr));
     player.actions.on('start game', () => this.handleGameStart());
-    player.actions.on('reset game', () => this.handleGameReset());
-    player.actions.on('player eliminated', player => this.handleEliminatedPlayer(player));
+    player.actions.on('player eliminated', plyr => this.handleEliminatedPlayer(plyr));
   }
 
   private handleEliminatedPlayer(player: Player) {
     this.sendAction('player eliminated', player.name);
-    if (this.players.filter(player => player.isInGame).length===1) {
+    if (this.players.filter(plyr => plyr.isInGame).length===1) {
       // Game over
-      this.sendAction('game over', this.players.filter(player => player.isInGame)[0].name);
-      this.handleGameReset();
+      this.sendAction('game over', this.players.filter(plyr => plyr.isInGame)[0].name);
+      this.resetGame();
     }
   }
 
@@ -74,7 +73,7 @@ export class Game {
     this.updateClients();
   }
 
-  private handleGameReset() {
+  private resetGame() {
     this.hasOnesBeenWagered = false;
     this.hasGameStarted = false;
     this.lastWager = {};
@@ -154,7 +153,7 @@ export class Game {
   private handleWager(player: Player, wager: Wager) {
     // Tell players a wager was made
     this.sendAction('wager', {player: player.name, wager: wager});
-    
+
     const currentPlayerIndex = this.getPlayerIndex(player);
 
     if (wager.callBullshit) {
@@ -182,7 +181,7 @@ export class Game {
   // TODO: getNextActivePlayer has not been thoroughly tested
   private getNextActivePlayer(currentPlayerIndex: number): Player {
     let counter: number = currentPlayerIndex;
-    
+
     while (!this.getNextPlayer(counter).isInGame) {
       counter ++;
     }

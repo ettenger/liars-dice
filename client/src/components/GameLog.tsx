@@ -56,7 +56,7 @@ export default class GameLog extends React.Component<myProps> {
       return (
         (wager.qty && wager.qty > 0 ? wager.qty : 'no') 
         + ' ' + numberStrings[wager.num-1] 
-        + ((wager.qty && wager.qty !== 1 ) ? ((wager.num===6) ? 'es' : 's') : ''));
+        + (((wager.qty || wager.num) && wager.qty !== 1 ) ? ((wager.num===6) ? 'es' : 's') : ''));
     }
   }
 
