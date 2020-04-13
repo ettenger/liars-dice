@@ -4,16 +4,18 @@ import { Wager } from './wager';
 
 export class Game {
   players: Player[] = [];
+  activePlayers: Player[] = [];
   startingNumberOfDice: number = 6;
   hasOnesBeenWagered: boolean = false;
   hasGameStarted: boolean = false;
   lastWager: Wager = {};
+  wasPlayerJustEliminated: boolean = false;
 
   constructor() {
   }
 
   get numDiceRemaining(): number {
-    return this.players.map(p => p.numDice).reduce((x, y) => x + y, 0);
+    return this.activePlayers.map(p => p.numDice).reduce((x, y) => x + y, 0);
   }
 
   get publicGameDetails() {
@@ -37,9 +39,12 @@ export class Game {
 
   private handleEliminatedPlayer(player: Player) {
     this.sendAction('player eliminated', player.name);
-    if (this.players.filter(plyr => plyr.isInGame).length===1) {
+    this.activePlayers = this.players.filter(plyr => plyr.isInGame);
+    this.wasPlayerJustEliminated = true;
+
+    if (this.activePlayers.length===1) {
       // Game over
-      this.sendAction('game over', this.players.filter(plyr => plyr.isInGame)[0].name);
+      this.sendAction('game over', this.activePlayers[0].name);
       this.resetGame();
     }
   }
@@ -47,7 +52,7 @@ export class Game {
   private beginNewRound() {
     this.sendAction('round start','');
     this.hasOnesBeenWagered = false;
-    this.players.forEach(player => {
+    this.activePlayers.forEach(player => {
       player.beginNewRound();
     });
     this.updateClients();
@@ -65,6 +70,7 @@ export class Game {
     this.lastWager = {};
     this.shuffle(this.players);
     this.players[0].isTheirTurn = true;
+    this.activePlayers = this.players;
     this.players.forEach(player => {
       player.beginGame(this.startingNumberOfDice);
     });
@@ -77,6 +83,7 @@ export class Game {
     this.hasOnesBeenWagered = false;
     this.hasGameStarted = false;
     this.lastWager = {};
+    this.activePlayers = [];
     this.players.forEach(player => {
       player.isTheirTurn = false;
     });
@@ -123,7 +130,7 @@ export class Game {
       counterFxn = d => d === wager.num || d === 1;
     }
 
-    const allDice: number[] = this.players.map(p => p.currentRoll).reduce((a, b) => a.concat(b), []);
+    const allDice: number[] = this.activePlayers.map(p => p.currentRoll).reduce((a, b) => a.concat(b), []);
     const count = allDice.filter(counterFxn).length;
 
     // Notify clients of the result
@@ -168,39 +175,34 @@ export class Game {
 
     // Check that the game didn't end before we got here
     if (this.hasGameStarted) {
-      const nextPlayer = this.getNextActivePlayer(currentPlayerIndex);
+      const nextPlayer = this.getNextPlayer(currentPlayerIndex);
       nextPlayer.startTurn();
       this.updateClients();
     }
   }
 
   private getPlayerIndex(player: Player): number {
-    return this.players.indexOf(player);
-  }
-
-  // TODO: getNextActivePlayer has not been thoroughly tested
-  private getNextActivePlayer(currentPlayerIndex: number): Player {
-    let counter: number = currentPlayerIndex;
-
-    while (!this.getNextPlayer(counter).isInGame) {
-      counter ++;
-    }
-    return this.getNextPlayer(counter);
+    return this.activePlayers.indexOf(player);
   }
 
   private getNextPlayer(currentPlayerIndex: number): Player {
-    if (currentPlayerIndex + 1 >= this.players.length) {
-      return this.players[0];
+    if (this.wasPlayerJustEliminated) { 
+      // This prevents a player from being skipped when the current player was just eliminated
+      currentPlayerIndex > 0 ? currentPlayerIndex-- : currentPlayerIndex = this.activePlayers.length;
+      this.wasPlayerJustEliminated = false;
+    }
+    if (currentPlayerIndex + 1 >= this.activePlayers.length) {
+      return this.activePlayers[0];
     } else {
-      return this.players[currentPlayerIndex + 1];
+      return this.activePlayers[currentPlayerIndex + 1];
     }
   }
 
   private getPreviousPlayer(currentPlayerIndex: number): Player {
     if (currentPlayerIndex - 1 < 0) {
-      return this.players[this.players.length - 1];
+      return this.activePlayers[this.activePlayers.length - 1];
     } else {
-      return this.players[currentPlayerIndex - 1];
+      return this.activePlayers[currentPlayerIndex - 1];
     }
   }
 

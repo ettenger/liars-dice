@@ -65,6 +65,7 @@ export class Player {
 
     if (this.numDice === 0) {
       this.isInGame = false;
+      this.currentRoll = [];
       this.actions.emit('player eliminated', this);
     }
     this.updateClient();

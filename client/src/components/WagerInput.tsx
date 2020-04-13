@@ -70,7 +70,12 @@ export default class WagerInput extends React.Component<myProps, myState> {
   }
 
   private placeWager(calledBS: boolean = false) {
-    const wager : Wager = { callBullshit: calledBS, num: this.state.currentNum, qty: this.state.currentQty }
+    let wager : Wager;
+    if (calledBS) {
+      wager = { callBullshit: calledBS, num: this.props.gameData.lastWager.num, qty: this.props.gameData.lastWager.qty };
+    } else {
+      wager = { callBullshit: calledBS, num: this.state.currentNum, qty: this.state.currentQty };
+    }
     const message : Message = { type: 'action', name: 'wager', payload: wager };
     this.props.messagesSender(message);
   }
