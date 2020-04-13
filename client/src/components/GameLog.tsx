@@ -28,13 +28,19 @@ export default class GameLog extends React.Component<myProps> {
           break;
         case 'dice reveal':
           const tempWager: Wager = { callBullshit: false, num: props.message.payload.num, qty: props.message.payload.count}
-          returnVal = <span style={{color: '#d842a6'}}>There {props.message.payload.count > 1 ? 'are':'is'} {this.formatWager(tempWager)}<br/></span>
+          returnVal = <span style={{color: '#d842a6'}}>There {props.message.payload.count !== 1 ? 'are':'is'} {this.formatWager(tempWager)}<br/></span>
           break;
         case 'lose die':
           returnVal = <span style={{color: '#d842a6'}}>{props.message.payload} loses a die<br/></span>
           break;
         case 'round start':
           returnVal = <span style={{color: 'cyan'}}>Starting a new round!<br/></span>;
+          break;
+        case 'player eliminated':
+          returnVal = <span style={{color: '#ff4d4d'}}>{props.message.payload} was eliminated!<br/></span>;
+          break;
+        case 'game over':
+          returnVal = <span style={{color: '#299129'}}>The game is over. {props.message.payload} wins!<br/></span>;
           break;
       }
     } 
@@ -46,8 +52,11 @@ export default class GameLog extends React.Component<myProps> {
     let numberStrings = ['one', 'two', 'three', 'four', 'five', 'six']
     if (wager.callBullshit) {
       return 'Bullshit!';
-    } else if (wager.num && wager.qty) {
-      return (wager.qty + ' ' + numberStrings[wager.num-1] + ((wager.qty > 1 ) ? ((wager.num===6) ? 'es' : 's') : ''));
+    } else if (wager.num) {
+      return (
+        (wager.qty && wager.qty > 0 ? wager.qty : 'no') 
+        + ' ' + numberStrings[wager.num-1] 
+        + ((wager.qty && wager.qty !== 1 ) ? ((wager.num===6) ? 'es' : 's') : ''));
     }
   }
 

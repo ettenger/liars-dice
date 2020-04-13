@@ -39,6 +39,7 @@ export class Player {
   public beginGame(numDice: number) {
     this.numDice = numDice;
     this.isInGame = true;
+    this.lastWager = {};
     this.beginNewRound();
   }
 
@@ -64,6 +65,7 @@ export class Player {
 
     if (this.numDice === 0) {
       this.isInGame = false;
+      this.actions.emit('player eliminated', this);
     }
     this.updateClient();
   }

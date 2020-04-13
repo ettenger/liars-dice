@@ -30,9 +30,19 @@ export class Game {
     this.players.push(player);
     // TODO: Remove event listener when player leaves
     player.actions.on('wager', wager => this.handleWager(player, wager));
-    player.actions.on('updated', playerName => this.handleUpdate(playerName));
+    player.actions.on('updated', player => this.handleUpdate(player));
     player.actions.on('start game', () => this.handleGameStart());
     player.actions.on('reset game', () => this.handleGameReset());
+    player.actions.on('player eliminated', player => this.handleEliminatedPlayer(player));
+  }
+
+  private handleEliminatedPlayer(player: Player) {
+    this.sendAction('player eliminated', player.name);
+    if (this.players.filter(player => player.isInGame).length===1) {
+      // Game over
+      this.sendAction('game over', this.players.filter(player => player.isInGame)[0].name);
+      this.handleGameReset();
+    }
   }
 
   private beginNewRound() {
@@ -65,7 +75,6 @@ export class Game {
   }
 
   private handleGameReset() {
-    this.startingNumberOfDice = 6;
     this.hasOnesBeenWagered = false;
     this.hasGameStarted = false;
     this.lastWager = {};
@@ -77,7 +86,7 @@ export class Game {
 
   private sendAction(actionName: string, payload: any) {
     // Send action message to clients for the game log
-    const message: Message = { type: 'action', name: actionName, payload: payload};
+    const message: Message = { type: 'action', name: actionName, payload: payload };
     this.broadcastToClients(message);
   }
 
@@ -129,15 +138,17 @@ export class Game {
     const wagerToTest = previousPlayer.lastWager;
     const wagerWasSafe = this.testWager(wagerToTest);
     if (wagerWasSafe) {
-      caller.loseOneDie();
       this.sendAction('lose die', caller.name);
+      caller.loseOneDie();
     } else {
-      previousPlayer.loseOneDie()
       this.sendAction('lose die', previousPlayer.name);
+      previousPlayer.loseOneDie()
     }
-    // TODO: Handle end of player and end of game scenarios
+
     this.lastWager = {};
-    this.beginNewRound();
+    if (this.hasGameStarted) {
+      this.beginNewRound();
+    }
   }
 
   private handleWager(player: Player, wager: Wager) {
@@ -156,13 +167,26 @@ export class Game {
       }
     }
 
-    const nextPlayer = this.getNextPlayer(currentPlayerIndex);
-    nextPlayer.startTurn();
-    this.updateClients();
+    // Check that the game didn't end before we got here
+    if (this.hasGameStarted) {
+      const nextPlayer = this.getNextActivePlayer(currentPlayerIndex);
+      nextPlayer.startTurn();
+      this.updateClients();
+    }
   }
 
   private getPlayerIndex(player: Player): number {
     return this.players.indexOf(player);
+  }
+
+  // TODO: getNextActivePlayer has not been thoroughly tested
+  private getNextActivePlayer(currentPlayerIndex: number): Player {
+    let counter: number = currentPlayerIndex;
+    
+    while (!this.getNextPlayer(counter).isInGame) {
+      counter ++;
+    }
+    return this.getNextPlayer(counter);
   }
 
   private getNextPlayer(currentPlayerIndex: number): Player {

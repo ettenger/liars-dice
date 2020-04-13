@@ -167,6 +167,7 @@ export default class WagerInput extends React.Component<myProps, myState> {
   }
 
   render() {
+    // TODO: Tell players if ones are still wild
     return (
       <div className="Wager-input">
         <div style={{margin: "0 5px"}}>Enter a wager:</div>
