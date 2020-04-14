@@ -42,9 +42,13 @@ export class Game {
     this.activePlayers = this.players.filter(plyr => plyr.isInGame);
     this.wasPlayerJustEliminated = true;
 
-    if (this.activePlayers.length===1) {
+    if (this.activePlayers.length<=1) {
       // Game over
-      this.sendAction('game over', this.activePlayers[0].name);
+      if (this.activePlayers.length===1) {
+        this.sendAction('game over', this.activePlayers[0].name);
+      } else {
+        this.sendAction('game over', 'Nobody');
+      }
       this.resetGame();
     }
   }
@@ -134,8 +138,8 @@ export class Game {
     const count = allDice.filter(counterFxn).length;
 
     // Notify clients of the result
-    // TODO: Need to reveal everybody's dice to the players
-    this.sendAction('dice reveal',{count: count, num: wager.num});
+    const playerDice: any[] = this.activePlayers.map(p => ({name: p.name, dice: p.currentRoll}));
+    this.sendAction('dice reveal',{count: count, num: wager.num, dice: playerDice});
 
     return count >= wager.qty;
   }
