@@ -15,6 +15,7 @@ type myState = {
   minDiceQty: number,
   currentNum: number,
   currentQty: number,
+  submitAllowed: boolean
 };
 
 export default class WagerInput extends React.Component<myProps, myState> {
@@ -24,7 +25,7 @@ export default class WagerInput extends React.Component<myProps, myState> {
     this.placeWager = this.placeWager.bind(this);
     this.updateState = this.updateState.bind(this);
     this.legalWagerChange = this.legalWagerChange.bind(this);
-    this.state = { minDiceNum: 0, minDiceQty: 0, currentNum: 0, currentQty: 0 };
+    this.state = { minDiceNum: 0, minDiceQty: 0, currentNum: 0, currentQty: 0, submitAllowed: true };
   }
 
   componentDidMount() {
@@ -33,27 +34,48 @@ export default class WagerInput extends React.Component<myProps, myState> {
 
   private updateState() {
     if (this.props.gameData.lastWager.num && this.props.gameData.lastWager.qty) {
-      let minNum = this.props.gameData.lastWager.num !== 6 ? this.props.gameData.lastWager.num + 1 : 1;
-      let minQty = this.props.gameData.lastWager.num !== 6 ? this.props.gameData.lastWager.qty : this.props.gameData.lastWager.qty + 1;
-      
+      let minNum: number;
+      let minQty: number;
+      let allowSubmit: boolean = true;
+
+      if ((this.props.gameData.lastWager.num === 6) 
+      && (this.props.gameData.lastWager.qty === this.props.gameData.numDiceRemaining)) {
+        minNum = 6;
+        minQty = this.props.gameData.lastWager.qty;
+        allowSubmit = false;
+      } else if (this.props.gameData.lastWager.num === 6) {
+        minNum = 1;
+        minQty = this.props.gameData.lastWager.qty + 1;
+      } else {
+        minNum = this.props.gameData.lastWager.num + 1 ;
+        minQty = this.props.gameData.lastWager.qty;
+      }
+
       this.setState({ 
         minDiceNum: minNum,
         minDiceQty: minQty,
         currentNum: minNum, 
-        currentQty: minQty
+        currentQty: minQty,
+        submitAllowed: allowSubmit
       });
     } else {
       this.setState({ 
         minDiceNum: 1, 
         minDiceQty: 1,
         currentNum: 1,
-        currentQty: 1
+        currentQty: 1,
+        submitAllowed: true
       });
     }
   }
 
   private placeWager(calledBS: boolean = false) {
-    const wager : Wager = { callBullshit: calledBS, num: this.state.currentNum, qty: this.state.currentQty }
+    let wager : Wager;
+    if (calledBS) {
+      wager = { callBullshit: calledBS, num: this.props.gameData.lastWager.num, qty: this.props.gameData.lastWager.qty };
+    } else {
+      wager = { callBullshit: calledBS, num: this.state.currentNum, qty: this.state.currentQty };
+    }
     const message : Message = { type: 'action', name: 'wager', payload: wager };
     this.props.messagesSender(message);
   }
@@ -203,7 +225,7 @@ export default class WagerInput extends React.Component<myProps, myState> {
           <this.sensitiveButton 
             label='Submit Wager' 
             onClick={() => this.placeWager()} 
-            sensitivityControl={this.props.playerData.isTheirTurn}
+            sensitivityControl={this.props.playerData.isTheirTurn && this.state.submitAllowed}
           />
         </div>
         <div style={{margin: "0 5px"}}>or</div>

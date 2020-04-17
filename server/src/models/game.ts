@@ -4,16 +4,18 @@ import { Wager } from './wager';
 
 export class Game {
   players: Player[] = [];
+  activePlayers: Player[] = [];
   startingNumberOfDice: number = 6;
   hasOnesBeenWagered: boolean = false;
   hasGameStarted: boolean = false;
   lastWager: Wager = {};
+  wasPlayerJustEliminated: boolean = false;
 
   constructor() {
   }
 
   get numDiceRemaining(): number {
-    return this.players.map(p => p.numDice).reduce((x, y) => x + y, 0);
+    return this.activePlayers.map(p => p.numDice).reduce((x, y) => x + y, 0);
   }
 
   get publicGameDetails() {
@@ -30,15 +32,31 @@ export class Game {
     this.players.push(player);
     // TODO: Remove event listener when player leaves
     player.actions.on('wager', wager => this.handleWager(player, wager));
-    player.actions.on('updated', playerName => this.handleUpdate(playerName));
+    player.actions.on('updated', plyr => this.handleUpdate(plyr));
     player.actions.on('start game', () => this.handleGameStart());
-    player.actions.on('reset game', () => this.handleGameReset());
+    player.actions.on('player eliminated', plyr => this.handleEliminatedPlayer(plyr));
+  }
+
+  private handleEliminatedPlayer(player: Player) {
+    this.sendAction('player eliminated', player.name);
+    this.activePlayers = this.players.filter(plyr => plyr.isInGame);
+    this.wasPlayerJustEliminated = true;
+
+    if (this.activePlayers.length<=1) {
+      // Game over
+      if (this.activePlayers.length===1) {
+        this.sendAction('game over', this.activePlayers[0].name);
+      } else {
+        this.sendAction('game over', 'Nobody');
+      }
+      this.resetGame();
+    }
   }
 
   private beginNewRound() {
     this.sendAction('round start','');
     this.hasOnesBeenWagered = false;
-    this.players.forEach(player => {
+    this.activePlayers.forEach(player => {
       player.beginNewRound();
     });
     this.updateClients();
@@ -56,6 +74,7 @@ export class Game {
     this.lastWager = {};
     this.shuffle(this.players);
     this.players[0].isTheirTurn = true;
+    this.activePlayers = this.players;
     this.players.forEach(player => {
       player.beginGame(this.startingNumberOfDice);
     });
@@ -64,11 +83,11 @@ export class Game {
     this.updateClients();
   }
 
-  private handleGameReset() {
-    this.startingNumberOfDice = 6;
+  private resetGame() {
     this.hasOnesBeenWagered = false;
     this.hasGameStarted = false;
     this.lastWager = {};
+    this.activePlayers = [];
     this.players.forEach(player => {
       player.isTheirTurn = false;
     });
@@ -77,7 +96,7 @@ export class Game {
 
   private sendAction(actionName: string, payload: any) {
     // Send action message to clients for the game log
-    const message: Message = { type: 'action', name: actionName, payload: payload};
+    const message: Message = { type: 'action', name: actionName, payload: payload };
     this.broadcastToClients(message);
   }
 
@@ -115,12 +134,12 @@ export class Game {
       counterFxn = d => d === wager.num || d === 1;
     }
 
-    const allDice: number[] = this.players.map(p => p.currentRoll).reduce((a, b) => a.concat(b), []);
+    const allDice: number[] = this.activePlayers.map(p => p.currentRoll).reduce((a, b) => a.concat(b), []);
     const count = allDice.filter(counterFxn).length;
 
     // Notify clients of the result
-    // TODO: Need to reveal everybody's dice to the players
-    this.sendAction('dice reveal',{count: count, num: wager.num});
+    const playerDice: any[] = this.activePlayers.map(p => ({name: p.name, dice: p.currentRoll}));
+    this.sendAction('dice reveal',{count: count, num: wager.num, dice: playerDice});
 
     return count >= wager.qty;
   }
@@ -129,21 +148,23 @@ export class Game {
     const wagerToTest = previousPlayer.lastWager;
     const wagerWasSafe = this.testWager(wagerToTest);
     if (wagerWasSafe) {
-      caller.loseOneDie();
       this.sendAction('lose die', caller.name);
+      caller.loseOneDie();
     } else {
-      previousPlayer.loseOneDie()
       this.sendAction('lose die', previousPlayer.name);
+      previousPlayer.loseOneDie()
     }
-    // TODO: Handle end of player and end of game scenarios
+
     this.lastWager = {};
-    this.beginNewRound();
+    if (this.hasGameStarted) {
+      this.beginNewRound();
+    }
   }
 
   private handleWager(player: Player, wager: Wager) {
     // Tell players a wager was made
     this.sendAction('wager', {player: player.name, wager: wager});
-    
+
     const currentPlayerIndex = this.getPlayerIndex(player);
 
     if (wager.callBullshit) {
@@ -156,28 +177,36 @@ export class Game {
       }
     }
 
-    const nextPlayer = this.getNextPlayer(currentPlayerIndex);
-    nextPlayer.startTurn();
-    this.updateClients();
+    // Check that the game didn't end before we got here
+    if (this.hasGameStarted) {
+      const nextPlayer = this.getNextPlayer(currentPlayerIndex);
+      nextPlayer.startTurn();
+      this.updateClients();
+    }
   }
 
   private getPlayerIndex(player: Player): number {
-    return this.players.indexOf(player);
+    return this.activePlayers.indexOf(player);
   }
 
   private getNextPlayer(currentPlayerIndex: number): Player {
-    if (currentPlayerIndex + 1 >= this.players.length) {
-      return this.players[0];
+    if (this.wasPlayerJustEliminated) { 
+      // This prevents a player from being skipped when the current player was just eliminated
+      currentPlayerIndex > 0 ? currentPlayerIndex-- : currentPlayerIndex = this.activePlayers.length;
+      this.wasPlayerJustEliminated = false;
+    }
+    if (currentPlayerIndex + 1 >= this.activePlayers.length) {
+      return this.activePlayers[0];
     } else {
-      return this.players[currentPlayerIndex + 1];
+      return this.activePlayers[currentPlayerIndex + 1];
     }
   }
 
   private getPreviousPlayer(currentPlayerIndex: number): Player {
     if (currentPlayerIndex - 1 < 0) {
-      return this.players[this.players.length - 1];
+      return this.activePlayers[this.activePlayers.length - 1];
     } else {
-      return this.players[currentPlayerIndex - 1];
+      return this.activePlayers[currentPlayerIndex - 1];
     }
   }
 
