@@ -1,6 +1,7 @@
 import React, { Fragment } from 'react'; 
 import Message from '../interfaces/Message'
 import Wager from '../interfaces/Wager';
+import MiniDice from './MiniDice';
 
 type myProps = {
   messages: Message[]
@@ -37,12 +38,12 @@ export default class GameLog extends React.Component<myProps> {
 
           returnVal = 
             <>
-              { allDice.map((dice, key) => (
+              { allDice.map((ad, key) => (
                 <Fragment key={key}>
                   <span style={{display: 'flex', alignItems: 'center'}}>
-                    <span style={{color: '#ffc400'}}>{dice.name}:&nbsp;</span>
-                    { dice.dice.sort().map((num, index) =>
-                      <this.GameDice
+                    <span style={{color: '#ffc400'}}>{ad.name}:&nbsp;</span>
+                    { ad.dice.sort().map((num, index) =>
+                      <MiniDice
                         key={index}
                         num={num}
                       />,
@@ -71,18 +72,6 @@ export default class GameLog extends React.Component<myProps> {
     return returnVal;
   }
 
-  private GameDice = (props: { key: any, num: Number }) => {
-    if (props.num===0) { return(<span></span>); }
-    return (
-      <img 
-        src={"../images/dice"+ props.num.toString() + ".svg"} 
-        alt={props.num.toString()} 
-        height="20px" 
-        className="img-dice">
-      </img>
-    );
-  }
-
   private formatWager(wager: Wager) {
     let numberStrings = ['one', 'two', 'three', 'four', 'five', 'six']
     if (wager.callBullshit) {
@@ -99,10 +88,10 @@ export default class GameLog extends React.Component<myProps> {
     return (
       <div className="Gamelog">
         <p>
-          { this.props.messages.map((message, index) =>
+          { this.props.messages.map((msg, index) =>
             <this.GameLogMessage
               key={index}
-              message={message}
+              message={msg}
             />,
           )}
         </p>

@@ -11,9 +11,6 @@ export class Game {
   lastWager: Wager = {};
   wasPlayerJustEliminated: boolean = false;
 
-  constructor() {
-  }
-
   get numDiceRemaining(): number {
     return this.activePlayers.map(p => p.numDice).reduce((x, y) => x + y, 0);
   }
@@ -110,6 +107,7 @@ export class Game {
   }
 
   private broadcastToClients(message: Message) {
+    console.log(JSON.stringify(message));
     this.players.forEach(player => {
       player.ws.send(JSON.stringify(message));
     })
@@ -128,10 +126,10 @@ export class Game {
   private testWager(wager: Wager): boolean {
     let counterFxn;
     if (this.hasOnesBeenWagered) {
-      counterFxn = d => d === wager.num;
+      counterFxn = (d: number) => d === wager.num;
     } else {
       // Ones are wild unless they've been called
-      counterFxn = d => d === wager.num || d === 1;
+      counterFxn = (d: number) => d === wager.num || d === 1;
     }
 
     const allDice: number[] = this.activePlayers.map(p => p.currentRoll).reduce((a, b) => a.concat(b), []);

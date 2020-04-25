@@ -25,7 +25,10 @@ export default class App extends React.Component<{}, AppState> {
   }
 
   private connect = (name: string) => {
-    const ws = new WebSocket('ws://localhost:8080');
+    // TODO: Use .env config file for HOST setting
+    // const HOST = window.location.origin.replace(/^http/, 'ws');
+    const HOST = (window.location.hostname==='localhost') ? 'ws://localhost:8080' : window.location.origin.replace(/^http/, 'ws');
+    const ws = new WebSocket(HOST);
     
     ws.onopen = () => {
         this.setState({ ws: ws, name: name })

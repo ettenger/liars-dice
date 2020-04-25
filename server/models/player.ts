@@ -33,6 +33,7 @@ export class Player {
       name: 'player',
       payload: pick(this, ['name', 'numDice', 'currentRoll', 'isInGame', 'isTheirTurn', 'lastWager'])
     };
+    console.log(JSON.stringify(message));
     this.ws.send(JSON.stringify(message));
   }
 
@@ -44,6 +45,7 @@ export class Player {
   }
 
   public beginNewRound() {
+    this.lastWager = {};
     this.roll();
     this.updateClient();
   }

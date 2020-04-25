@@ -8,7 +8,7 @@ type myProps = {
 
 export default class StatusTable extends React.Component<myProps> {
 
-  private GameDice = (props: { key: any, player: PlayerData }) => {
+  private PlayerInfo = (props: { key: any, player: PlayerData }) => {
     return (
       <tr className={props.player.isTheirTurn ? 'highlight-text' : ''}>
         <td>{ props.player.name }</td>
@@ -27,7 +27,7 @@ export default class StatusTable extends React.Component<myProps> {
               <th>Dice</th>
             </tr>
             { this.props.gameData.players.map((player, index) =>
-              <this.GameDice
+              <this.PlayerInfo
                 key={index}
                 player={player}
               />,
