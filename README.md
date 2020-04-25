@@ -51,8 +51,16 @@ $ heroku git:remote -a lit-wildwood-82400
 $ yarn build-server
 $ yarn build-client
 $ git commit -m "<commit message>"
-$ git push heroku master
+$ git push heroku <ettenger/liars-dice branchname>:master
 ```
+Regarding the "git push" command:
+Since Heroku only deploys from the master branch of teh Heroku Git repository, all changes must be pushed to Heroku master.
+
+If pushing from the master branch of ettenger/lairs-dice, use `$ git push heroku master`
+
+If pushing from another branch, use `$ git push heroku <ettenger/liars-dice branchname>:master`
+
+For example, if pushing from the deployment branch, use `$ git push heroku deployment:master`
 
 Once deployed, you can run the app using: `$ heroku open`.
 
