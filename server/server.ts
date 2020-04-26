@@ -27,8 +27,6 @@ const wss = new Server({ server: server });
 
 const game = new Game();
 
-// TODO: Add 30 second heartbeat message to prevent connections from timing out
-
 wss.on('connection', (ws) => {
   const player = new Player(ws);
   game.addPlayer(player);

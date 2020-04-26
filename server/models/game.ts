@@ -11,6 +11,11 @@ export class Game {
   lastWager: Wager = {};
   wasPlayerJustEliminated: boolean = false;
 
+    constructor() {
+      // Send heartbeat message to clients every 30 seconds to prevent the HTTP connections from timing out
+      setInterval(()=>this.sendHeartbeat(), 30000);
+    }
+
   get numDiceRemaining(): number {
     return this.activePlayers.map(p => p.numDice).reduce((x, y) => x + y, 0);
   }
@@ -110,7 +115,7 @@ export class Game {
     console.log(JSON.stringify(message));
     this.players.forEach(player => {
       player.ws.send(JSON.stringify(message));
-    })
+    });
   }
 
   private updateClients() {
@@ -119,6 +124,11 @@ export class Game {
       name: 'game',
       payload: this.publicGameDetails
     };
+    this.broadcastToClients(message);
+  }
+
+  private sendHeartbeat() {
+    const message: Message = { type: 'heartbeat', name: '', payload: '' };
     this.broadcastToClients(message);
   }
 

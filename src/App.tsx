@@ -59,7 +59,9 @@ export default class App extends React.Component<{}, AppState> {
               this.setState({ playerData: message.payload });
             }
             break;
-        }
+        } 
+      } else if (message.type === 'heartbeat') {
+          console.log("Heartbeat received");
       }
     }
   }
