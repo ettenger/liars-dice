@@ -4,6 +4,8 @@ import { resolve } from 'path';
 import { createServer } from 'http';
 import { Game } from './models/game';
 import { Player } from './models/player';
+import queryString from 'query-string'
+import WebSocket from 'ws';
 
 const PORT = process.env.PORT || 8080;
 
@@ -23,13 +25,21 @@ app.get('*', (_, response) => {
 const wss = new Server({ server: server });
 
 // TODO: reconnection logic ala https://github.com/websockets/ws/wiki/Websocket-client-implementation-for-auto-reconnect
-// TODO: sticky session after client refresh. save uuid and name?
 
 const game = new Game();
 
-wss.on('connection', (ws) => {
-  const player = new Player(ws);
-  game.addPlayer(player);
+wss.on('connection', (ws: WebSocket, req: any) => {
+  const params = queryString.parse(req.url.substring(1));
+
+  if (params.name && params.uuid) {
+    // New connection
+    const player = new Player(ws, params.uuid.toString());
+    game.addPlayer(player);
+    player.setName(params.name.toString());
+  } else if (params.uuid) {
+    // Recovered connection
+    game.loadPLayer(ws, params.uuid.toString());
+  }
 
   console.log('Client connected');
   ws.on('close', () => console.log('Client disconnected'));

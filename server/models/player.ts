@@ -2,9 +2,11 @@ import { Wager } from './wager';
 import { Message } from './message';
 import { pick } from 'lodash';
 import { EventEmitter } from 'events';
+import WebSocket from 'ws';
 
 export class Player {
-  ws: any;
+  ws: WebSocket;
+  uuid: string;
   name: string = '';
   numDice: number = 0;
   currentRoll: number[] = [0];
@@ -13,8 +15,9 @@ export class Player {
   lastWager: Wager = {};
   actions = new EventEmitter();
 
-  constructor(ws) {
+  constructor(ws: WebSocket, uuid: string) {
     this.ws = ws;
+    this.uuid = uuid
     this.ws.on('message', this.handleClientMessage.bind(this));
   }
 
@@ -25,6 +28,13 @@ export class Player {
   public setName(name: string) {
     this.name = name;
     this.actions.emit('updated', this);
+  }
+
+  public rejoin(ws: WebSocket) {
+    this.ws = ws;
+    this.ws.on('message', this.handleClientMessage.bind(this));
+    this.updateClient();
+    this.actions.emit('rejoined', this);
   }
 
   public updateClient() {
@@ -94,7 +104,7 @@ export class Player {
     if (message.type === 'data') {
       switch (message.name) {
         case 'name':
-          this.setName(message.payload);
+          this.setName(message.payload.name);
           break;
       }
     } else if (message.type === 'action') {

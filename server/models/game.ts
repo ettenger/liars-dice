@@ -1,6 +1,7 @@
 import { Player } from './player';
 import { Message } from './message';
 import { Wager } from './wager';
+import WebSocket from 'ws';
 
 export class Game {
   players: Player[] = [];
@@ -30,11 +31,18 @@ export class Game {
     }
   }
 
+  public loadPLayer(ws: WebSocket, uuid: string) {
+    const player = this.players.find(plyr => plyr.uuid === uuid);
+    if (player) {
+      player.rejoin(ws);
+    }
+  }
+
   public addPlayer(player: Player) {
     this.players.push(player);
-    // TODO: Remove event listener when player leaves
     player.actions.on('wager', wager => this.handleWager(player, wager));
     player.actions.on('updated', plyr => this.handleUpdate(plyr));
+    player.actions.on('rejoined', plyr => this.handleRejoin(plyr));
     player.actions.on('start game', () => this.handleGameStart());
     player.actions.on('player eliminated', plyr => this.handleEliminatedPlayer(plyr));
   }
@@ -105,6 +113,15 @@ export class Game {
   private handleUpdate(player: Player) {
     // Send action message to clients for the game log
     this.sendAction('player join', player.name)
+
+    // Send state data to clients for rendering
+    this.updateClients();
+    player.updateClient();
+  }
+
+  private handleRejoin(player: Player) {
+    // Send action message to clients for the game log
+    this.sendAction('player rejoin', player.name)
 
     // Send state data to clients for rendering
     this.updateClients();

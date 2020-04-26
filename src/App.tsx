@@ -8,9 +8,11 @@ import GameData from './interfaces/GameData';
 import PlayerData from './interfaces/PlayerData';
 import DicePanel from './components/DicePanel';
 import StatusTable from './components/StatusTable';
+import { v4 as uuidv4 } from 'uuid';
 
 type AppState = {
   ws?: WebSocket,
+  uuid?: string,
   name: string,
   messages: Message[],
   gameData: GameData,
@@ -20,20 +22,42 @@ type AppState = {
 export default class App extends React.Component<{}, AppState> {
   constructor(props: any) {
     super(props);
-    this.state = { name: '', messages: [], gameData: new GameData(), playerData: new PlayerData() };
+    var initState: AppState = { name: '', messages: [], gameData: new GameData(), playerData: new PlayerData() };
+    
+    // If a UUID exists for this session, use it
+    const id: string | null = window.sessionStorage.getItem("liars-dice-uuid")
+    if (id) { initState.uuid = id; console.log('Found UUID'); }
+
+    this.state = initState;
     this.connect = this.connect.bind(this);
   }
 
-  private connect = (name: string) => {
-    // TODO: Use .env config file for HOST setting
-    // const HOST = window.location.origin.replace(/^http/, 'ws');
-    const HOST = (window.location.hostname==='localhost') ? 'ws://localhost:8080' : window.location.origin.replace(/^http/, 'ws');
+  componentDidMount() {
+    if (this.state.uuid) { 
+      this.connect(); 
+    }
+  }
+
+  private connect = (name?: string) => {   
+    // Retreive or create a UUID
+    let id = this.state.uuid
+    if (name) {
+      id = uuidv4();
+      window.sessionStorage.setItem("liars-dice-uuid", id);
+    }
+
+    // Connect to ws server and pass UUID and name (if provided)
+    let HOST = (window.location.hostname === 'localhost') ? 'ws://localhost:8080' : window.location.origin.replace(/^http/, 'ws');
+    HOST += '/?uuid=' + id;
+    if (name) { HOST += '&name=' + name; }
     const ws = new WebSocket(HOST);
-    
-    ws.onopen = () => {
-        this.setState({ ws: ws, name: name })
-        ws.send(JSON.stringify({ type: 'data', name: 'name', payload: name}));
-    };
+
+    // Save state data
+    if (name) {
+      this.setState({ ws: ws, uuid: id, name: name });
+    } else {
+      this.setState({ ws: ws, uuid: id });
+    }
 
     ws.onmessage = (event: MessageEvent) => {
       let message: any = this.parseData(event.data,'Message');
@@ -61,7 +85,7 @@ export default class App extends React.Component<{}, AppState> {
             break;
         } 
       } else if (message.type === 'heartbeat') {
-          console.log("Heartbeat received");
+          // console.log("Heartbeat received");
       }
     }
   }
@@ -97,6 +121,7 @@ export default class App extends React.Component<{}, AppState> {
   }
 
   private sendMessage = (message: Message) => {
+    console.log('Sending message!');
     if (this.state.ws) {
       this.state.ws.send(JSON.stringify(message));
     } else {
@@ -105,7 +130,7 @@ export default class App extends React.Component<{}, AppState> {
   }
 
   render() {
-    if (!this.state.ws) {
+    if (!this.state.uuid) {
       return (
         <div className="App">
           <header className="App-header">
