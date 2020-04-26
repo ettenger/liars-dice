@@ -4,6 +4,11 @@ import { pick } from 'lodash';
 import { EventEmitter } from 'events';
 import WebSocket from 'ws';
 
+// TODO: Send action message to clients when connection closes
+//       -- Clients should display disconnected players in italics in the Status Table
+//       -- Need to add isConnected, disconnectTime attributes
+// TODO: Implement 60 second kick timer for disconnected players
+
 export class Player {
   ws: WebSocket;
   uuid: string;
