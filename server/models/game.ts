@@ -49,10 +49,7 @@ export class Game {
   }
 
   private handlePlayerDrop(player: Player) {
-      // Send action message to clients for the game log
       this.sendAction('player drop', player.name)
-
-      // Send state data to clients for rendering
       this.updateClients();
       player.updateClient();
   }
@@ -121,19 +118,13 @@ export class Game {
   }
 
   private handleUpdate(player: Player) {
-    // Send action message to clients for the game log
     this.sendAction('player join', player.name)
-
-    // Send state data to clients for rendering
     this.updateClients();
     player.updateClient();
   }
 
   private handleRejoin(player: Player) {
-    // Send action message to clients for the game log
     this.sendAction('player rejoin', player.name)
-
-    // Send state data to clients for rendering
     this.updateClients();
     player.updateClient();
   }
