@@ -25,7 +25,6 @@ export default class StatusTable extends React.Component<myProps> {
         </tr>
       );
     }
-    
   }
 
   render() {
