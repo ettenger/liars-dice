@@ -30,7 +30,7 @@ Runs on localhost:3000. Does have hot reloading. Should update automatically wit
 ```
 $ cd liars-dice
 $ yarn build
-$ yarn server
+$ yarn serve
 ```
 
 From your browser, open http://localhost:8080
