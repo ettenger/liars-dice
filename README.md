@@ -29,8 +29,7 @@ Runs on localhost:3000. Does have hot reloading. Should update automatically wit
 ### Local Dev (Production Mode)
 ```
 $ cd liars-dice
-$ yarn build-server
-$ yarn build-client
+$ yarn build
 $ yarn server
 ```
 
@@ -48,13 +47,11 @@ You need Heroku CLI: https://devcenter.heroku.com/articles/heroku-cli
 $ cd liars-dice
 $ heroku login (not required once you are logged in)
 $ heroku git:remote -a lit-wildwood-82400
-$ yarn build-server
-$ yarn build-client
 $ git commit -m "<commit message>"
 $ git push heroku <ettenger/liars-dice branchname>:master
 ```
 Regarding the "git push" command:
-Since Heroku only deploys from the master branch of teh Heroku Git repository, all changes must be pushed to Heroku master.
+Since Heroku only deploys from the master branch of the Heroku Git repository, all changes must be pushed to Heroku master.
 
 If pushing from the master branch of ettenger/lairs-dice, use `$ git push heroku master`
 
