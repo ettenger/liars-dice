@@ -7,4 +7,5 @@ export default class PlayerData {
     isInGame: boolean = false;
     isTheirTurn: boolean = false;
     lastWager: Wager = new Wager();
+    isConnected: boolean = true;
   }

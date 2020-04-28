@@ -69,6 +69,9 @@ export default class GameLog extends React.Component<myProps> {
         case 'game over':
           returnVal = <span style={{display: 'flex', color: '#299129'}}>The game is over. {props.message.payload} wins!<br/></span>;
           break;
+        default:
+          returnVal = <></>
+          break;
       }
     } 
 

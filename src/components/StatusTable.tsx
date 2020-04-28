@@ -9,12 +9,23 @@ type myProps = {
 export default class StatusTable extends React.Component<myProps> {
 
   private PlayerInfo = (props: { key: any, player: PlayerData }) => {
-    return (
-      <tr className={props.player.isTheirTurn ? 'highlight-text' : ''}>
-        <td>{ props.player.name }</td>
-        <td>{ props.player.numDice }</td>
-      </tr>
-    );
+    // TODO: Handle display of diconnected players
+    if (!props.player.isConnected) {
+      return (
+        <tr className={props.player.isTheirTurn ? 'highlight-text' : ''}>
+          <td><i>{ props.player.name }</i></td>
+          <td><i>{ props.player.numDice }</i></td>
+        </tr>
+      );
+    } else {
+      return (
+        <tr className={props.player.isTheirTurn ? 'highlight-text' : ''}>
+          <td>{ props.player.name }</td>
+          <td>{ props.player.numDice }</td>
+        </tr>
+      );
+    }
+    
   }
 
   render() {

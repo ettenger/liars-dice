@@ -12,6 +12,10 @@ body {
   background-color: #282c34;
 }
 
+i {
+  color: #acacac;
+}
+
 .App-header {
   background-color: #282c34;
   height: 96vh;

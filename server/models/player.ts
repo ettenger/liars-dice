@@ -4,10 +4,7 @@ import { pick } from 'lodash';
 import { EventEmitter } from 'events';
 import WebSocket from 'ws';
 
-// TODO: Send action message to clients when connection closes
-//       -- Clients should display disconnected players in italics in the Status Table
-//       -- Need to add isConnected, disconnectTime attributes
-// TODO: Implement 60 second kick timer for disconnected players
+// TODO: Implement 30 second kick timer for disconnected players (when it's their turn)
 
 export class Player {
   ws: WebSocket;
@@ -19,15 +16,16 @@ export class Player {
   isTheirTurn: boolean = false;
   lastWager: Wager = {};
   actions = new EventEmitter();
+  isConnected: boolean = true;
 
   constructor(ws: WebSocket, uuid: string) {
     this.ws = ws;
     this.uuid = uuid
-    this.ws.on('message', this.handleClientMessage.bind(this));
+    this.createListeners();
   }
 
   get publicDetails() {
-    return pick(this, ['name', 'numDice', 'isInGame', 'isTheirTurn', 'lastWager']);
+    return pick(this, ['name', 'numDice', 'isInGame', 'isTheirTurn', 'lastWager', 'isConnected']);
   }
 
   public setName(name: string) {
@@ -35,9 +33,20 @@ export class Player {
     this.actions.emit('updated', this);
   }
 
+  private createListeners() {
+    this.ws.on('message', this.handleClientMessage.bind(this));
+    this.ws.on('close', this.handleClientDisconnect.bind(this));
+  }
+
+  private handleClientDisconnect() {
+    this.isConnected = false;
+    this.actions.emit('disconnected', this);
+  }
+
   public rejoin(ws: WebSocket) {
     this.ws = ws;
-    this.ws.on('message', this.handleClientMessage.bind(this));
+    this.isConnected = true;
+    this.createListeners();
     this.updateClient();
     this.actions.emit('rejoined', this);
   }

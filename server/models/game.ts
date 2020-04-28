@@ -43,8 +43,18 @@ export class Game {
     player.actions.on('wager', wager => this.handleWager(player, wager));
     player.actions.on('updated', plyr => this.handleUpdate(plyr));
     player.actions.on('rejoined', plyr => this.handleRejoin(plyr));
+    player.actions.on('disconnected', plyr => this.handlePlayerDrop(plyr));
     player.actions.on('start game', () => this.handleGameStart());
     player.actions.on('player eliminated', plyr => this.handleEliminatedPlayer(plyr));
+  }
+
+  private handlePlayerDrop(player: Player) {
+      // Send action message to clients for the game log
+      this.sendAction('player drop', player.name)
+
+      // Send state data to clients for rendering
+      this.updateClients();
+      player.updateClient();
   }
 
   private handleEliminatedPlayer(player: Player) {
