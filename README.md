@@ -6,6 +6,7 @@ A websocket-based game of probabilities and bluffing
 
 ### Prerequisites
 You need NodeJS: https://nodejs.org/
+
 You need yarn: https://classic.yarnpkg.com/en/
 
 ### Installation
@@ -37,7 +38,7 @@ From your browser, open http://localhost:8080
 
 You can run multiple instances.
 
-Does not have hot reloading. You will need to stop (Ctrl-C) and start again to run any changes.. Since this runs the built versions of the server and client, any changes need to be rebuilt before the server is reloaded.
+Does not have hot reloading. You will need to stop (Ctrl-C) and start again to run any changes. Since this runs the built versions of the server and client, any changes need to be rebuilt before the server is reloaded.
 
 ## Deployment
 
