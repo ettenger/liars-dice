@@ -22,9 +22,12 @@ export default class GameLog extends React.Component<myProps> {
         case 'player join':
           returnVal = <span style={{display: 'flex', color: '#9b9b9b'}}>{props.message.payload} joined the game<br/></span>;
           break;
-        case 'player rejoin':
-          returnVal = <span style={{display: 'flex', color: '#9b9b9b'}}>{props.message.payload} rejoined the game<br/></span>;
-          break;
+        // case 'player rejoin':
+        //   returnVal = <span style={{display: 'flex', color: '#9b9b9b'}}>{props.message.payload} rejoined the game<br/></span>;
+        //   break;
+        // case 'player drop':
+        //   returnVal = <span style={{display: 'flex', color: '#9b9b9b'}}>{props.message.payload} disconnected<br/></span>;
+        //   break;
         case 'game start':
           returnVal = <span style={{display: 'flex', color: 'cyan'}}>The game is starting!<br/></span>;
           break;
