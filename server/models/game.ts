@@ -15,6 +15,8 @@ export class Game {
   lastWager: Wager = {};
   wasPlayerJustEliminated: boolean = false;
   timerId: ReturnType<typeof setTimeout>;
+  messageLog: Message[] = [];
+  timerMessageIndex: number = 0;
 
   constructor() {
     // Send heartbeat message to clients to prevent the HTTP connections from timing out
@@ -58,17 +60,17 @@ export class Game {
   }
 
   private startKickTimer(player: Player) {
-    this.sendAction('start timer', player.publicDetails);
+    this.sendTimer('start', player.publicDetails);
     this.timerId = setTimeout(() => player.deactivate(),TIMER_MAX)
   }
 
   private stopKickTimer(player: Player) {
     clearTimeout(this.timerId);
-    this.sendAction('stop timer', '');
+    this.sendTimer('stop');
   }
 
   private handleRemovedPlayer(player: Player) {
-    this.sendAction('stop timer', '');
+    this.sendTimer('stop');
     this.sendAction('player removed', player.name);
     this.activePlayers = this.players.filter(plyr => plyr.isInGame);
     this.wasPlayerJustEliminated = true;
@@ -138,11 +140,12 @@ export class Game {
   }
 
   private resetGame() {
-    // TODO: Reset message log
     this.hasOnesBeenWagered = false;
     this.hasGameStarted = false;
     this.lastWager = {};
     this.activePlayers = [];
+    this.messageLog = [];
+    this.timerMessageIndex = 0;
     this.players.forEach(player => {
       player.isTheirTurn = false;
     });
@@ -150,12 +153,30 @@ export class Game {
   }
 
   private sendAction(actionName: string, payload: any) {
-    // TODO: Store message log so clients can recover it on rejoin
-    // TODO: Create new message type for timers
-    // Send action message to clients for the game log
     const message: Message = { type: 'action', name: actionName, payload: payload };
+    this.messageLog.push(message);
     this.broadcastToClients(message);
   }
+
+  private sendMessageLog(player: Player) {
+    const message: Message = { 
+      type: 'data', 
+      name: 'messages', 
+      payload: { messages: this.messageLog, timerIndex: this.timerMessageIndex }
+    };
+    player.ws.send(JSON.stringify(message));
+  }
+
+  private sendTimer(timerAction: 'start' | 'stop', payload: any = '') {
+    const message: Message = { type: 'action', name: timerAction.toString() + ' timer', payload: payload };
+    if (timerAction==='start') {
+      this.timerMessageIndex = this.messageLog.length;
+      this.messageLog.push(message);
+    } else {
+      this.messageLog.splice(this.timerMessageIndex,1);
+    }
+    this.broadcastToClients(message);
+  }  
 
   private handleUpdate(player: Player) {
     this.sendAction('player join', player.name)
@@ -164,7 +185,7 @@ export class Game {
   }
 
   private handleRejoin(player: Player) {
-    // TODO: Send message log to client for situational awareness
+    this.sendMessageLog(player);
     this.sendAction('player rejoin', player.name)
     if (player.isTheirTurn) {
       this.stopKickTimer(player);
@@ -174,7 +195,7 @@ export class Game {
   }
 
   private broadcastToClients(message: Message) {
-    console.log(JSON.stringify(message));
+    // console.log(JSON.stringify(message));
     this.players.forEach(player => {
       player.ws.send(JSON.stringify(message));
     });

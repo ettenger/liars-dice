@@ -17,6 +17,11 @@ type AppState = {
   playerData: PlayerData
 }
 
+type MessageLog = {
+  messages: Message[], 
+  timerIndex: number
+}
+
 // TODO: Add chat feature
 // TODO: Add instructions - non-modal popup?
 
@@ -61,10 +66,8 @@ export default class App extends React.Component<{}, AppState> {
     this.ws = new WebSocket(HOST);
     
     this.ws.onmessage = (event: MessageEvent) => {
-      let message: any = this.parseData(event.data,'Message');
+      let message: Message | false = this.parseData(event.data,'Message');
       if (!message) { return; }
-
-      let data: any;
 
       if (message.type === 'action') {
         // Save action messages to state for the Game Log
@@ -89,23 +92,29 @@ export default class App extends React.Component<{}, AppState> {
         else {
           this.setState({ messages: [...this.state.messages, message] });
         }
-      } else if (message.type === 'data') {
-        switch (message.name) {
-          // Save server data to state
-          case 'game':
-            data = this.parseData(event.data,'GameData');
-            if (data) {
-              this.setState({ gameData: message.payload });
-            }
-            break;
-          case 'player':
-            data = this.parseData(event.data,'PlayerData');
-            if (data) {
-              this.setState({ playerData: message.payload });
-            }
-            break;
-        } 
-      } else if (message.type === 'heartbeat') {
+      } 
+      else if (message.type === 'data') {
+        if (message.name === 'game') {
+          let data: GameData | false = this.parseData(JSON.stringify(message.payload),'GameData');
+          if (data) {
+            this.setState({ gameData: data });
+          }
+        }
+        else if (message.name === 'player') {
+          let data: PlayerData | false = this.parseData(JSON.stringify(message.payload),'PlayerData');
+          if (data) {
+            this.setState({ playerData: data });
+          }
+        }
+        else if (message.name === 'messages') {
+          let data: MessageLog | false = this.parseData(JSON.stringify(message.payload),'MessageLog');
+          if (data) {
+            this.kickTimerMessageIndex = data.timerIndex;
+            this.setState({ messages: data.messages });
+          }
+        }
+      } 
+      else if (message.type === 'heartbeat') {
           // console.log("Heartbeat received");
       }
     }
@@ -113,7 +122,7 @@ export default class App extends React.Component<{}, AppState> {
     this.setState({ uuid: id });
   }
 
-  private parseData(inputString: string, outputType: 'Message' | 'GameData' | 'PlayerData' | 'Other') {
+  private parseData(inputString: string, outputType: 'Message' | 'GameData' | 'PlayerData' | 'MessageLog') {
     let output: any;
 
     try {
@@ -127,8 +136,8 @@ export default class App extends React.Component<{}, AppState> {
         case 'PlayerData':
           output = JSON.parse(inputString) as PlayerData;
           break;
-        default:
-          output = JSON.parse(inputString);
+        case 'MessageLog':
+          output = JSON.parse(inputString) as Message[];
           break;
       }
       console.log('Successfully parsed ' + outputType.toString() + ' object:');
