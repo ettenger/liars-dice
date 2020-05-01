@@ -138,6 +138,7 @@ export class Game {
   }
 
   private resetGame() {
+    // TODO: Reset message log
     this.hasOnesBeenWagered = false;
     this.hasGameStarted = false;
     this.lastWager = {};
@@ -149,6 +150,8 @@ export class Game {
   }
 
   private sendAction(actionName: string, payload: any) {
+    // TODO: Store message log so clients can recover it on rejoin
+    // TODO: Create new message type for timers
     // Send action message to clients for the game log
     const message: Message = { type: 'action', name: actionName, payload: payload };
     this.broadcastToClients(message);
@@ -161,6 +164,7 @@ export class Game {
   }
 
   private handleRejoin(player: Player) {
+    // TODO: Send message log to client for situational awareness
     this.sendAction('player rejoin', player.name)
     if (player.isTheirTurn) {
       this.stopKickTimer(player);
