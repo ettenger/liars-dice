@@ -10,8 +10,6 @@ import DicePanel from './components/DicePanel';
 import StatusTable from './components/StatusTable';
 import { v4 as uuidv4 } from 'uuid';
 
-// TODO: Remove ws, uuid, name, kickTimerMessageIndex from state since they do not warrant rendering
-
 type AppState = {
   messages: Message[],
   gameData: GameData,
