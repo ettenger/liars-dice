@@ -57,6 +57,7 @@ export class Game {
     player.actions.on('start game', () => this.handleGameStart());
     player.actions.on('player eliminated', plyr => this.handleEliminatedPlayer(plyr));
     player.actions.on('player removed', plyr => this.handleRemovedPlayer(plyr));
+    this.sendMessageLog(player);
   }
 
   private startKickTimer(player: Player) {
@@ -118,6 +119,10 @@ export class Game {
     this.updateClients();
   }
 
+  private removeDisconnectedPlayers() {
+    this.players = this.players.filter(p => p.isConnected);
+  }
+
   private handleGameStart() {
     if (this.hasGameStarted) { return; }
 
@@ -128,6 +133,7 @@ export class Game {
     this.hasGameStarted = true;
     this.hasOnesBeenWagered = false;
     this.lastWager = {};
+    this.removeDisconnectedPlayers();
     this.shuffle(this.players);
     this.players[0].isTheirTurn = true;
     this.activePlayers = this.players;
