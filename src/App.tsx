@@ -13,56 +13,49 @@ import { v4 as uuidv4 } from 'uuid';
 // TODO: Remove ws, uuid, name, kickTimerMessageIndex from state since they do not warrant rendering
 
 type AppState = {
-  ws?: WebSocket,
-  uuid?: string,
-  name: string,
   messages: Message[],
   gameData: GameData,
-  playerData: PlayerData,
-  kickTimerMessageIndex: number
+  playerData: PlayerData
 }
 
 export default class App extends React.Component<{}, AppState> {
+  private ws?: WebSocket;
+  private uuid: string | null ;
+  private name: string = '';
+  private kickTimerMessageIndex: number = -1;
+
   constructor(props: any) {
     super(props);
-    var initState: AppState = { name: '', messages: [], gameData: new GameData(), playerData: new PlayerData(), kickTimerMessageIndex: -1 };
-    
-    // If a UUID exists for this session, use it
-    const id: string | null = window.sessionStorage.getItem("liars-dice-uuid")
-    if (id) { initState.uuid = id; console.log('Found UUID'); }
-
-    this.state = initState;
+    this.state = { messages: [], gameData: new GameData(), playerData: new PlayerData() };
+    this.uuid = window.sessionStorage.getItem("liars-dice-uuid")
     this.connect = this.connect.bind(this);
   }
 
   componentDidMount() {
-    if (this.state.uuid) { 
+    if (this.uuid) { 
       this.connect(); 
     }
   }
 
   private connect = (name?: string) => {   
     // Retreive or create a UUID
-    let id = this.state.uuid
+    let id = this.uuid
     if (name) {
       id = uuidv4();
       window.sessionStorage.setItem("liars-dice-uuid", id);
     }
+    this.uuid = id;
 
     // Connect to ws server and pass UUID and name (if provided)
     let HOST = (window.location.hostname === 'localhost') ? 'ws://localhost:8080' : window.location.origin.replace(/^http/, 'ws');
     HOST += '/?uuid=' + id;
-    if (name) { HOST += '&name=' + name; }
-    const ws = new WebSocket(HOST);
-
-    // Save state data
-    if (name) {
-      this.setState({ ws: ws, uuid: id, name: name });
-    } else {
-      this.setState({ ws: ws, uuid: id });
+    if (name) { 
+      HOST += '&name=' + name; 
+      this.name = name;
     }
-
-    ws.onmessage = (event: MessageEvent) => {
+    this.ws = new WebSocket(HOST);
+    
+    this.ws.onmessage = (event: MessageEvent) => {
       let message: any = this.parseData(event.data,'Message');
       if (!message) { return; }
 
@@ -71,21 +64,20 @@ export default class App extends React.Component<{}, AppState> {
       if (message.type === 'action') {
         // Save action messages to state for the Game Log
         if (message.name==='start timer') {
-          this.setState({ 
-            kickTimerMessageIndex: this.state.messages.length, 
-            messages: [...this.state.messages, message] 
-          });
-        } else if (message.name==='stop timer') {
+          this.kickTimerMessageIndex = this.state.messages.length;
+          this.setState({ messages: [...this.state.messages, message] });
+        } 
+        else if (message.name==='stop timer') {
           // Remove the timer from the message log so we stop displaying it
           let msgs = this.state.messages;
-          if (this.state.kickTimerMessageIndex !== -1) {
-            msgs.splice(this.state.kickTimerMessageIndex,1);
+          
+          if (this.kickTimerMessageIndex !== -1) {
+            msgs.splice(this.kickTimerMessageIndex,1);
           }
-          this.setState({ 
-            kickTimerMessageIndex: -1, 
-            messages: msgs 
-          });
-        } else {
+          this.kickTimerMessageIndex = -1;
+          this.setState({ messages: msgs });
+        } 
+        else {
           this.setState({ messages: [...this.state.messages, message] });
         }
       } else if (message.type === 'data') {
@@ -141,15 +133,15 @@ export default class App extends React.Component<{}, AppState> {
   }
 
   private sendMessage = (message: Message) => {
-    if (this.state.ws) {
-      this.state.ws.send(JSON.stringify(message));
+    if (this.ws) {
+      this.ws.send(JSON.stringify(message));
     } else {
       console.log('Unable to send message - no WebSocket in App.state');
     }
   }
 
   render() {
-    if (!this.state.uuid) {
+    if (!this.uuid) {
       return (
         <div className="App">
           <header className="App-header">
