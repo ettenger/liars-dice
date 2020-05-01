@@ -21,7 +21,7 @@ type diceReveal = {
 const TIMER_MAX: number = 30000 // Miliseconds
 
 export default class GameLogMessage extends React.Component<myProps, myState> {
-  private timerId: number = 0;
+  private timerId?: ReturnType<typeof setTimeout>;
 
   constructor(props: myProps) {
     super(props);
@@ -31,12 +31,14 @@ export default class GameLogMessage extends React.Component<myProps, myState> {
 
   componentDidMount() {
     if (this.props.message.type === 'action' && this.props.message.name === 'start timer') {
-      this.timerId = window.setInterval(this.countdownTimerTick, 1000)
+      this.timerId = setInterval(this.countdownTimerTick, 1000)
     }
   }
 
   componentWillUnmount() {
-    clearInterval(this.timerId);
+    if (this.timerId) {
+      clearInterval(this.timerId);
+    }
   }
 
   shouldComponentUpdate() {
