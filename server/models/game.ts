@@ -3,8 +3,8 @@ import { Message } from './message';
 import { Wager } from './wager';
 import WebSocket from 'ws';
 
-const TIMER_MAX: number = 30000 // Miliseconds
-const HEARTBEAT_INTERVAL: number = 30000 // Miliseconds
+const TIMER_MAX: number = 30000; // Miliseconds
+const HEARTBEAT_INTERVAL: number = 30000; // Miliseconds
 
 export class Game {
   players: Player[] = [];
@@ -40,6 +40,7 @@ export class Game {
     if (player) {
       player.rejoin(ws);
     }
+    // TODO: Allow player to rejoin
   }
 
   public addPlayer(player: Player) {
@@ -182,9 +183,11 @@ export class Game {
   }
 
   private sendHeartbeat() {
-    // TODO: Don't send heartbeats if there are no clients connected
     const message: Message = { type: 'heartbeat', name: '', payload: '' };
-    this.broadcastToClients(message);
+    // Only send heartbeats if there is a client connected
+    if (this.players.filter(p => p.isConnected).length > 0) {
+      this.broadcastToClients(message);
+    }
   }
 
   private testWager(wager: Wager): boolean {
