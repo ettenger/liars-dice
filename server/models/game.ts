@@ -60,7 +60,7 @@ export class Game {
   }
 
   private stopKickTimer(player: Player) {
-    window.clearTimeout(this.timerId);
+    clearTimeout(this.timerId);
     this.sendAction('stop timer', '');
   }
 
