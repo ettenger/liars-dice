@@ -18,6 +18,7 @@ type AppState = {
 }
 
 // TODO: Add chat feature
+// TODO: Add instructions - non-modal popup?
 
 export default class App extends React.Component<{}, AppState> {
   private ws?: WebSocket;
