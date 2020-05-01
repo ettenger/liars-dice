@@ -8,4 +8,5 @@ export default class PlayerData {
     isTheirTurn: boolean = false;
     lastWager: Wager = new Wager();
     isConnected: boolean = true;
+    timerStartTime: number = 0;
   }

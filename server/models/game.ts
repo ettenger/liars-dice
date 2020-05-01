@@ -3,6 +3,9 @@ import { Message } from './message';
 import { Wager } from './wager';
 import WebSocket from 'ws';
 
+const TIMER_MAX: number = 30000 // Miliseconds
+const HEARTBEAT_INTERVAL: number = 30000 // Miliseconds
+
 export class Game {
   players: Player[] = [];
   activePlayers: Player[] = [];
@@ -11,11 +14,12 @@ export class Game {
   hasGameStarted: boolean = false;
   lastWager: Wager = {};
   wasPlayerJustEliminated: boolean = false;
+  timerId: ReturnType<typeof setTimeout>;
 
-    constructor() {
-      // Send heartbeat message to clients every 30 seconds to prevent the HTTP connections from timing out
-      setInterval(()=>this.sendHeartbeat(), 30000);
-    }
+  constructor() {
+    // Send heartbeat message to clients every 30 seconds to prevent the HTTP connections from timing out
+    setInterval(()=>this.sendHeartbeat(), HEARTBEAT_INTERVAL);
+  }
 
   get numDiceRemaining(): number {
     return this.activePlayers.map(p => p.numDice).reduce((x, y) => x + y, 0);
@@ -46,10 +50,48 @@ export class Game {
     player.actions.on('disconnected', plyr => this.handlePlayerDrop(plyr));
     player.actions.on('start game', () => this.handleGameStart());
     player.actions.on('player eliminated', plyr => this.handleEliminatedPlayer(plyr));
+    player.actions.on('player removed', plyr => this.handleRemovedPlayer(plyr));
+  }
+
+  private startKickTimer(player: Player) {
+    this.sendAction('start timer', player.publicDetails);
+    this.timerId = setTimeout(() => player.deactivate(),TIMER_MAX)
+  }
+
+  private stopKickTimer(player: Player) {
+    window.clearTimeout(this.timerId);
+    this.sendAction('stop timer', '');
+  }
+
+  private handleRemovedPlayer(player: Player) {
+    this.sendAction('stop timer', '');
+    this.sendAction('player removed', player.name);
+    this.activePlayers = this.players.filter(plyr => plyr.isInGame);
+    this.wasPlayerJustEliminated = true;
+    this.checkForGameOver();
+
+    // If the game is still in progress
+    if (this.hasGameStarted) {
+      this.startNextTurn(player);
+    }
+  }
+
+  private checkForGameOver() {
+    if (this.activePlayers.length<=1) {
+      if (this.activePlayers.length===1) {
+        this.sendAction('game over', this.activePlayers[0].name);
+      } else {
+        this.sendAction('game over', 'Nobody');
+      }
+      this.resetGame();
+    }
   }
 
   private handlePlayerDrop(player: Player) {
       this.sendAction('player drop', player.name)
+      if (player.isTheirTurn) {
+        this.startKickTimer(player);
+      }
       this.updateClients();
       player.updateClient();
   }
@@ -58,16 +100,7 @@ export class Game {
     this.sendAction('player eliminated', player.name);
     this.activePlayers = this.players.filter(plyr => plyr.isInGame);
     this.wasPlayerJustEliminated = true;
-
-    if (this.activePlayers.length<=1) {
-      // Game over
-      if (this.activePlayers.length===1) {
-        this.sendAction('game over', this.activePlayers[0].name);
-      } else {
-        this.sendAction('game over', 'Nobody');
-      }
-      this.resetGame();
-    }
+    this.checkForGameOver();
   }
 
   private beginNewRound() {
@@ -125,6 +158,9 @@ export class Game {
 
   private handleRejoin(player: Player) {
     this.sendAction('player rejoin', player.name)
+    if (player.isTheirTurn) {
+      this.stopKickTimer(player);
+    }
     this.updateClients();
     player.updateClient();
   }
@@ -146,12 +182,13 @@ export class Game {
   }
 
   private sendHeartbeat() {
+    // TODO: Don't send heartbeats if there are no clients connected
     const message: Message = { type: 'heartbeat', name: '', payload: '' };
     this.broadcastToClients(message);
   }
 
-  // Returns true if wager was correct, false for bullshit
   private testWager(wager: Wager): boolean {
+    // Returns true if wager was correct, false for bullshit
     let counterFxn;
     if (this.hasOnesBeenWagered) {
       counterFxn = (d: number) => d === wager.num;
@@ -203,11 +240,19 @@ export class Game {
       }
     }
 
-    // Check that the game didn't end before we got here
+    this.startNextTurn(player);
+  }
+
+  private startNextTurn(currentPlayer: Player) {
+    // Confirm the game has not ended
     if (this.hasGameStarted) {
+      const currentPlayerIndex = this.getPlayerIndex(currentPlayer);
       const nextPlayer = this.getNextPlayer(currentPlayerIndex);
       nextPlayer.startTurn();
       this.updateClients();
+      if (!nextPlayer.isConnected) {
+        this.startKickTimer(nextPlayer);
+      }
     }
   }
 

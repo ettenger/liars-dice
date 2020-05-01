@@ -10,19 +10,22 @@ import DicePanel from './components/DicePanel';
 import StatusTable from './components/StatusTable';
 import { v4 as uuidv4 } from 'uuid';
 
+// TODO: Remove ws, uuid, name, kickTimerMessageIndex from state since they do not warrant rendering
+
 type AppState = {
   ws?: WebSocket,
   uuid?: string,
   name: string,
   messages: Message[],
   gameData: GameData,
-  playerData: PlayerData
+  playerData: PlayerData,
+  kickTimerMessageIndex: number
 }
 
 export default class App extends React.Component<{}, AppState> {
   constructor(props: any) {
     super(props);
-    var initState: AppState = { name: '', messages: [], gameData: new GameData(), playerData: new PlayerData() };
+    var initState: AppState = { name: '', messages: [], gameData: new GameData(), playerData: new PlayerData(), kickTimerMessageIndex: -1 };
     
     // If a UUID exists for this session, use it
     const id: string | null = window.sessionStorage.getItem("liars-dice-uuid")
@@ -67,7 +70,24 @@ export default class App extends React.Component<{}, AppState> {
 
       if (message.type === 'action') {
         // Save action messages to state for the Game Log
-        this.setState({ messages: [...this.state.messages, message] });
+        if (message.name==='start timer') {
+          this.setState({ 
+            kickTimerMessageIndex: this.state.messages.length, 
+            messages: [...this.state.messages, message] 
+          });
+        } else if (message.name==='stop timer') {
+          // Remove the timer from the message log so we stop displaying it
+          let msgs = this.state.messages;
+          if (this.state.kickTimerMessageIndex !== -1) {
+            msgs.splice(this.state.kickTimerMessageIndex,1);
+          }
+          this.setState({ 
+            kickTimerMessageIndex: -1, 
+            messages: msgs 
+          });
+        } else {
+          this.setState({ messages: [...this.state.messages, message] });
+        }
       } else if (message.type === 'data') {
         switch (message.name) {
           // Save server data to state
@@ -121,7 +141,6 @@ export default class App extends React.Component<{}, AppState> {
   }
 
   private sendMessage = (message: Message) => {
-    console.log('Sending message!');
     if (this.state.ws) {
       this.state.ws.send(JSON.stringify(message));
     } else {

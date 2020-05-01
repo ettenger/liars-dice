@@ -4,8 +4,6 @@ import { pick } from 'lodash';
 import { EventEmitter } from 'events';
 import WebSocket from 'ws';
 
-// TODO: Implement 30 second kick timer for disconnected players (when it's their turn)
-
 export class Player {
   ws: WebSocket;
   uuid: string;
@@ -17,6 +15,7 @@ export class Player {
   lastWager: Wager = {};
   actions = new EventEmitter();
   isConnected: boolean = true;
+  timerStartTime: number = 0;
 
   constructor(ws: WebSocket, uuid: string) {
     this.ws = ws;
@@ -25,7 +24,7 @@ export class Player {
   }
 
   get publicDetails() {
-    return pick(this, ['name', 'numDice', 'isInGame', 'isTheirTurn', 'lastWager', 'isConnected']);
+    return pick(this, ['name', 'numDice', 'isInGame', 'isTheirTurn', 'lastWager', 'isConnected', 'timerStartTime']);
   }
 
   public setName(name: string) {
@@ -40,6 +39,7 @@ export class Player {
 
   private handleClientDisconnect() {
     this.isConnected = false;
+    this.timerStartTime = new Date().valueOf();
     this.actions.emit('disconnected', this);
   }
 
@@ -49,6 +49,16 @@ export class Player {
     this.createListeners();
     this.updateClient();
     this.actions.emit('rejoined', this);
+  }
+
+  public deactivate() {
+    this.numDice = 0;
+    this.currentRoll = [];
+    this.isInGame = false;
+    this.isTheirTurn = false;
+    this.lastWager = {};
+    this.timerStartTime = 0;
+    this.actions.emit('player removed', this);
   }
 
   public updateClient() {
@@ -76,6 +86,7 @@ export class Player {
 
   public startTurn() {
     this.isTheirTurn = true;
+    this.timerStartTime = new Date().valueOf();
     this.updateClient();
   }
 
