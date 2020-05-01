@@ -17,6 +17,8 @@ type AppState = {
   playerData: PlayerData
 }
 
+// TODO: Add chat feature
+
 export default class App extends React.Component<{}, AppState> {
   private ws?: WebSocket;
   private name: string = '';
@@ -68,8 +70,6 @@ export default class App extends React.Component<{}, AppState> {
         if (message.name==='retry join') {
           window.sessionStorage.removeItem("liars-dice-uuid");
           this.setState({ uuid: undefined });
-          // this.render();
-          // this.connect();
         }
         else if (message.name==='start timer') {
           this.kickTimerMessageIndex = this.state.messages.length;
