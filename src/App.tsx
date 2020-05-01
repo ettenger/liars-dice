@@ -11,6 +11,7 @@ import StatusTable from './components/StatusTable';
 import { v4 as uuidv4 } from 'uuid';
 
 type AppState = {
+  uuid?: string,
   messages: Message[],
   gameData: GameData,
   playerData: PlayerData
@@ -18,34 +19,37 @@ type AppState = {
 
 export default class App extends React.Component<{}, AppState> {
   private ws?: WebSocket;
-  private uuid: string | null ;
   private name: string = '';
   private kickTimerMessageIndex: number = -1;
 
   constructor(props: any) {
     super(props);
-    this.state = { messages: [], gameData: new GameData(), playerData: new PlayerData() };
-    this.uuid = window.sessionStorage.getItem("liars-dice-uuid")
+    let uuid = window.sessionStorage.getItem("liars-dice-uuid")
+    if (uuid) {
+      this.state = { uuid: uuid, messages: [], gameData: new GameData(), playerData: new PlayerData() };
+    } else {
+      this.state = { messages: [], gameData: new GameData(), playerData: new PlayerData() };
+    }
     this.connect = this.connect.bind(this);
   }
 
   componentDidMount() {
-    if (this.uuid) { 
+    if (this.state.uuid) { 
       this.connect(); 
     }
   }
 
   private connect = (name?: string) => {   
     // Retreive or create a UUID
-    let id = this.uuid
+    let id = this.state.uuid
     if (name) {
       id = uuidv4();
       window.sessionStorage.setItem("liars-dice-uuid", id);
     }
-    this.uuid = id;
 
     // Connect to ws server and pass UUID and name (if provided)
-    let HOST = (window.location.hostname === 'localhost') ? 'ws://localhost:8080' : window.location.origin.replace(/^http/, 'ws');
+    let HOST = (window.location.hostname === 'localhost') ? 
+      'ws://localhost:8080' : window.location.origin.replace(/^http/, 'ws');
     HOST += '/?uuid=' + id;
     if (name) { 
       HOST += '&name=' + name; 
@@ -61,7 +65,13 @@ export default class App extends React.Component<{}, AppState> {
 
       if (message.type === 'action') {
         // Save action messages to state for the Game Log
-        if (message.name==='start timer') {
+        if (message.name==='retry join') {
+          window.sessionStorage.removeItem("liars-dice-uuid");
+          this.setState({ uuid: undefined });
+          // this.render();
+          // this.connect();
+        }
+        else if (message.name==='start timer') {
           this.kickTimerMessageIndex = this.state.messages.length;
           this.setState({ messages: [...this.state.messages, message] });
         } 
@@ -98,6 +108,8 @@ export default class App extends React.Component<{}, AppState> {
           // console.log("Heartbeat received");
       }
     }
+
+    this.setState({ uuid: id });
   }
 
   private parseData(inputString: string, outputType: 'Message' | 'GameData' | 'PlayerData' | 'Other') {
@@ -139,7 +151,7 @@ export default class App extends React.Component<{}, AppState> {
   }
 
   render() {
-    if (!this.uuid) {
+    if (!this.state.uuid) {
       return (
         <div className="App">
           <header className="App-header">

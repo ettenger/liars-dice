@@ -17,7 +17,8 @@ export class Game {
   timerId: ReturnType<typeof setTimeout>;
 
   constructor() {
-    // Send heartbeat message to clients every 30 seconds to prevent the HTTP connections from timing out
+    // Send heartbeat message to clients to prevent the HTTP connections from timing out
+    // Heroku automatically times out idle connections after 55 seconds
     setInterval(()=>this.sendHeartbeat(), HEARTBEAT_INTERVAL);
   }
 
@@ -39,8 +40,10 @@ export class Game {
     const player = this.players.find(plyr => plyr.uuid === uuid);
     if (player) {
       player.rejoin(ws);
+    } else {
+      const message: Message = { type: 'action', name: 'retry join', payload: '' };
+      ws.send(JSON.stringify(message));
     }
-    // TODO: Allow player to rejoin
   }
 
   public addPlayer(player: Player) {
