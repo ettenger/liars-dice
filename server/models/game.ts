@@ -224,7 +224,7 @@ export class Game {
     }
   }
 
-  private testWager(wager: Wager): boolean {
+  private testWager(wager: Wager, deadOn: boolean = false): boolean {
     // Returns true if wager was correct, false for bullshit
     let counterFxn;
     if (this.hasOnesBeenWagered) {
@@ -240,13 +240,19 @@ export class Game {
     // Notify clients of the result
     const playerDice: any[] = this.activePlayers.map(p => ({name: p.name, dice: p.currentRoll}));
     this.sendAction('dice reveal',{count: count, num: wager.num, dice: playerDice});
-
-    return count >= wager.qty;
+    console.log(count);
+    console.log(wager.qty);
+    if (deadOn) {
+      return count !== wager.qty;
+    } else {
+      return count >= wager.qty;
+    }
   }
 
   private calledBullshit(caller: Player, previousPlayer: Player) {
     const wagerToTest = previousPlayer.lastWager;
-    const wagerWasSafe = this.testWager(wagerToTest);
+    const wagerWasSafe = this.testWager(wagerToTest, caller.lastWager.deadOn);
+    console.log(wagerWasSafe);
     if (wagerWasSafe) {
       this.sendAction('lose die', caller.name);
       caller.loseOneDie();
@@ -267,7 +273,7 @@ export class Game {
 
     const currentPlayerIndex = this.getPlayerIndex(player);
 
-    if (wager.callBullshit) {
+    if (wager.callBullshit || wager.deadOn) {
       const previousPlayer = this.getPreviousPlayer(currentPlayerIndex);
       this.calledBullshit(player, previousPlayer);
     } else {

@@ -24,6 +24,9 @@ type MessageLog = {
 
 // TODO: Add chat feature
 // TODO: Add instructions - non-modal popup?
+// TODO: Optional turn timer
+// TODO: Make inputs more user friendly
+// TODO: Fireworks or similar end of game celebration
 
 export default class App extends React.Component<{}, AppState> {
   private ws?: WebSocket;

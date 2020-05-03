@@ -69,10 +69,12 @@ export default class WagerInput extends React.Component<myProps, myState> {
     }
   }
 
-  private placeWager(calledBS: boolean = false) {
+  private placeWager(calledBS: boolean = false, deadOn: boolean = false) {
     let wager : Wager;
     if (calledBS) {
       wager = { callBullshit: calledBS, num: this.props.gameData.lastWager.num, qty: this.props.gameData.lastWager.qty };
+    } else if (deadOn) {
+      wager = { deadOn: deadOn, num: this.props.gameData.lastWager.num, qty: this.props.gameData.lastWager.qty };
     } else {
       wager = { callBullshit: calledBS, num: this.state.currentNum, qty: this.state.currentQty };
     }
@@ -180,6 +182,7 @@ export default class WagerInput extends React.Component<myProps, myState> {
       return (<button type="submit" onClick={props.onClick} disabled>{props.label}</button>);
     }
   }
+
   componentDidUpdate(prevProps: myProps) {
     if ((this.props.gameData.lastWager.num !== prevProps.gameData.lastWager.num)
       || (this.props.gameData.lastWager.qty !== prevProps.gameData.lastWager.qty)
@@ -233,6 +236,14 @@ export default class WagerInput extends React.Component<myProps, myState> {
           <this.sensitiveButton 
             label='Call BS' 
             onClick={() => this.placeWager(true)} 
+            sensitivityControl={this.props.playerData.isTheirTurn && (this.state.minDiceNum > 1 || this.state.minDiceQty > 1)}
+          />
+        </div>
+        <div style={{margin: "0 5px"}}>or</div>
+        <div> 
+          <this.sensitiveButton 
+            label='Dead On' 
+            onClick={() => this.placeWager(false, true)} 
             sensitivityControl={this.props.playerData.isTheirTurn && (this.state.minDiceNum > 1 || this.state.minDiceQty > 1)}
           />
         </div>

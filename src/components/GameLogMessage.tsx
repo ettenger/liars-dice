@@ -56,6 +56,8 @@ export default class GameLogMessage extends React.Component<myProps, myState> {
     let numberStrings = ['one', 'two', 'three', 'four', 'five', 'six']
     if (wager.callBullshit) {
       return 'Bullshit!';
+    } else if (wager.deadOn) {
+      return 'Dead on!';
     } else if (wager.num) {
       return (
         (wager.qty && wager.qty > 0 ? wager.qty : 'no') 
